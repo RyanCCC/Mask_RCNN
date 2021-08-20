@@ -1,0 +1,9 @@
+NAME = 'COCO'
+IMAGE_PER_GPU = 2
+GPU_COUNT =1
+NUM_CLASSES = 1+80
+DATASET_DIR = './dataset'
+PRETRAIN_MODEL = './model/mask_rcnn_coco.h5'
+
+DATASET_SOURCE = 'TEMP'
+CLASS = {'1':'APPLE', '2':'BANANA'}
