@@ -47,9 +47,9 @@ anchor：
 ![image](https://user-images.githubusercontent.com/27406337/131063639-47362d5d-e826-4274-9034-57769b351fdb.png)
 
 
-### Keras实现
+### 代码实现实现
 
-主要参考[Mask R-CNN Code](https://github.com/matterport/Mask_RCNN)，在Keras分支。
+主要参考[Mask R-CNN Code](https://github.com/matterport/Mask_RCNN)，详情请查看Keras分支。另外目前在tensorflow2实现。
 
 ### 参考
 
