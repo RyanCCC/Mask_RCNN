@@ -65,8 +65,7 @@ class MASK_RCNN(object):
             GPU_COUNT = 1
             IMAGES_PER_GPU = 1
             DETECTION_MIN_CONFIDENCE = self.confidence
-            
-            NAME = "shapes"
+            NAME = "Customer"
             RPN_ANCHOR_SCALES = self.RPN_ANCHOR_SCALES
             IMAGE_MIN_DIM = self.IMAGE_MIN_DIM
             IMAGE_MAX_DIM = self.IMAGE_MAX_DIM

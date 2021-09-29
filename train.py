@@ -11,7 +11,7 @@ from utils.anchors import get_anchors
 from utils.utils import mold_inputs,unmold_detections
 from mrcnn.mrcnn import get_train_model,get_predict_model
 from mrcnn.mrcnn_training import data_generator,load_image_gt
-from utils.dataset import ShapesDataset
+from utils.customerDataset import CustomerDataset
 
 def log(text, array=None):
     if array is not None:
@@ -24,8 +24,8 @@ def log(text, array=None):
         text += "  {}".format(array.dtype)
     print(text)
 
-class ShapesConfig(Config):
-    NAME = "shapes"
+class CustomerConfig(Config):
+    NAME = "Customer"
     GPU_COUNT = 1
     # 应该通过设置IMAGES_PER_GPU来设置BATCH的大小，而不是下面的BATCH_SIZE
     # BATCHS_SIZE自动设置为IMAGES_PER_GPU*GPU_COUNT
@@ -35,13 +35,14 @@ class ShapesConfig(Config):
     RPN_ANCHOR_SCALES = (16, 32, 64, 128, 256)
     IMAGE_MIN_DIM = 512
     IMAGE_MAX_DIM = 512
+    CLASSES = ['circle', 'square', 'triangle']
 
 if __name__ == "__main__":
     learning_rate = 1e-5
     init_epoch = 0
     epoch = 100
 
-    dataset_root_path="./train_dataset/"
+    dataset_root_path="./train_data/"
     img_floder = dataset_root_path + "imgs/"
     mask_floder = dataset_root_path + "mask/"
     yaml_floder = dataset_root_path + "yaml/"
@@ -55,21 +56,21 @@ if __name__ == "__main__":
 
     MODEL_DIR = "logs"
 
-    COCO_MODEL_PATH = "model_data/mask_rcnn_coco.h5"
-    config = ShapesConfig()
+    COCO_MODEL_PATH = "model/mask_rcnn_coco.h5"
+    config = CustomerConfig()
     # 计算训练集和验证集长度
     config.STEPS_PER_EPOCH = len(train_imglist)//config.IMAGES_PER_GPU
     config.VALIDATION_STEPS = len(val_imglist)//config.IMAGES_PER_GPU
     config.display()
 
     # 训练数据集准备
-    dataset_train = ShapesDataset()
-    dataset_train.load_shapes(len(train_imglist), img_floder, mask_floder, train_imglist, yaml_floder)
+    dataset_train = CustomerDataset()
+    dataset_train.load_shapes(config.NAME,len(train_imglist), config.CLASSES, img_floder, mask_floder, train_imglist, yaml_floder)
     dataset_train.prepare()
 
     # 验证数据集准备
-    dataset_val = ShapesDataset()
-    dataset_val.load_shapes(len(val_imglist), img_floder, mask_floder, val_imglist, yaml_floder)
+    dataset_val = CustomerDataset()
+    dataset_val.load_shapes(config.NAME,len(val_imglist), config.CLASSES, img_floder, mask_floder, val_imglist, yaml_floder)
     dataset_val.prepare()
 
     # 获得训练模型

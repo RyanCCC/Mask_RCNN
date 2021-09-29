@@ -133,3 +133,7 @@ dmypy.json
 
 # viscode history extension
 .history
+
+train_data
+
+logs
