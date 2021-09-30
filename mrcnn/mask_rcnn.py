@@ -1,7 +1,4 @@
 import os
-import sys
-import random
-import math
 import numpy as np
 import skimage.io
 from PIL import Image
@@ -13,17 +10,18 @@ from utils.anchors import get_anchors
 from utils.utils import mold_inputs,unmold_detections
 from utils import visualize
 import keras.backend as K
+from config import InferenceConfig
 
 class MASK_RCNN(object):
     _defaults = {
-        "model_path": './model/mask_rcnn_coco.h5',
-        "classes_path": './data/coco_classes.txt',
+        "model_path": InferenceConfig.model,
+        "classes_path": InferenceConfig.classes_path,
         "confidence": 0.7,
 
         # 使用coco数据集检测的时候，IMAGE_MIN_DIM=1024，IMAGE_MAX_DIM=1024, RPN_ANCHOR_SCALES=(32, 64, 128, 256, 512)
-        "RPN_ANCHOR_SCALES": (32, 64, 128, 256, 512),
-        "IMAGE_MIN_DIM": 1024,
-        "IMAGE_MAX_DIM": 1024,
+        "RPN_ANCHOR_SCALES": InferenceConfig.RPN_ANCHOR_SCALES,
+        "IMAGE_MIN_DIM": InferenceConfig.IMAGE_MIN_DIM,
+        "IMAGE_MAX_DIM": InferenceConfig.IMAGE_MAX_DIM,
         
         # 在使用自己的数据集进行训练的时候，如果显存不足要调小图片大小
         # 同时要调小anchors

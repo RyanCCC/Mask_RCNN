@@ -6,12 +6,12 @@ import random
 
 import tensorflow as tf
 from utils import visualize
-from utils.config import Config
 from utils.anchors import get_anchors
 from utils.utils import mold_inputs,unmold_detections
 from mrcnn.mrcnn import get_train_model,get_predict_model
 from mrcnn.mrcnn_training import data_generator,load_image_gt
 from utils.customerDataset import CustomerDataset
+from config import CustomerConfig
 
 def log(text, array=None):
     if array is not None:
@@ -24,28 +24,17 @@ def log(text, array=None):
         text += "  {}".format(array.dtype)
     print(text)
 
-class CustomerConfig(Config):
-    NAME = "Customer"
-    GPU_COUNT = 1
-    # 应该通过设置IMAGES_PER_GPU来设置BATCH的大小，而不是下面的BATCH_SIZE
-    # BATCHS_SIZE自动设置为IMAGES_PER_GPU*GPU_COUNT
-    # 请各位注意哈！
-    IMAGES_PER_GPU = 1
-    NUM_CLASSES = 1 + 3
-    RPN_ANCHOR_SCALES = (16, 32, 64, 128, 256)
-    IMAGE_MIN_DIM = 512
-    IMAGE_MAX_DIM = 512
-    CLASSES = ['circle', 'square', 'triangle']
+
 
 if __name__ == "__main__":
-    learning_rate = 1e-5
+    learning_rate = CustomerConfig.LEARNING_RATE
     init_epoch = 0
-    epoch = 100
+    epoch = CustomerConfig.EPOCH
 
-    dataset_root_path="./train_data/"
-    img_floder = dataset_root_path + "imgs/"
-    mask_floder = dataset_root_path + "mask/"
-    yaml_floder = dataset_root_path + "yaml/"
+    dataset_root_path=CustomerConfig.TRAIN_DATASET
+    img_floder =os.path.join(dataset_root_path, "imgs")
+    mask_floder = os.path.join(dataset_root_path, "mask")
+    yaml_floder = os.path.join(dataset_root_path, "yaml")
     imglist = os.listdir(img_floder)
 
     count = len(imglist)
@@ -56,7 +45,7 @@ if __name__ == "__main__":
 
     MODEL_DIR = "logs"
 
-    COCO_MODEL_PATH = "model/mask_rcnn_coco.h5"
+    COCO_MODEL_PATH = CustomerConfig.PRETRAIN_MODEL
     config = CustomerConfig()
     # 计算训练集和验证集长度
     config.STEPS_PER_EPOCH = len(train_imglist)//config.IMAGES_PER_GPU
