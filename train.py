@@ -1,9 +1,7 @@
 import os
 from PIL import Image
-import keras
 import numpy as np
 import random
-
 import tensorflow as tf
 from utils import visualize
 from utils.anchors import get_anchors
@@ -12,6 +10,8 @@ from mrcnn.mrcnn import get_train_model,get_predict_model
 from mrcnn.mrcnn_training import data_generator,load_image_gt
 from utils.customerDataset import CustomerDataset
 from config import CustomerConfig
+
+tf.compat.v1.disable_eager_execution()
 
 def log(text, array=None):
     if array is not None:
@@ -76,9 +76,9 @@ if __name__ == "__main__":
     # 回执函数
     # 每次训练一个世代都会保存
     callbacks = [
-        keras.callbacks.TensorBoard(log_dir=MODEL_DIR,
+        tf.keras.callbacks.TensorBoard(log_dir=MODEL_DIR,
                                     histogram_freq=0, write_graph=True, write_images=False),
-        keras.callbacks.ModelCheckpoint(os.path.join(MODEL_DIR, "epoch{epoch:03d}_loss{loss:.3f}_val_loss{val_loss:.3f}.h5"),
+        tf.keras.callbacks.ModelCheckpoint(os.path.join(MODEL_DIR, "epoch{epoch:03d}_loss{loss:.3f}_val_loss{val_loss:.3f}.h5"),
                                         verbose=0, save_weights_only=True),
     ]
 
@@ -88,11 +88,9 @@ if __name__ == "__main__":
         log("Checkpoint Path: {}".format(MODEL_DIR))
 
         # 使用的优化器是
-        optimizer = keras.optimizers.Adam(lr=learning_rate, clipnorm=config.GRADIENT_CLIP_NORM)
+        optimizer = tf.keras.optimizers.Adam(lr=learning_rate, clipnorm=config.GRADIENT_CLIP_NORM)
 
         # 设置一下loss信息
-        model._losses = []
-        model._per_input_losses = {}
         loss_names = [
             "rpn_class_loss",  "rpn_bbox_loss",
             "mrcnn_class_loss", "mrcnn_bbox_loss", "mrcnn_mask_loss"]
@@ -101,9 +99,18 @@ if __name__ == "__main__":
             if layer.output in model.losses:
                 continue
             loss = (
-                tf.reduce_mean(layer.output, keepdims=True)
+                tf.reduce_mean(input_tensor=layer.output, keepdims=True)
                 * config.LOSS_WEIGHTS.get(name, 1.))
             model.add_loss(loss)
+        
+        # Add L2 Regularization
+        # Skip gamma and beta weights of batch normalization layers.
+        reg_losses = [
+            tf.keras.regularizers.l2(config.WEIGHT_DECAY)(w) / tf.cast(tf.size(input=w), tf.float32)
+            for w in model.trainable_weights
+            if 'gamma' not in w.name and 'beta' not in w.name]
+        model.add_loss(tf.add_n(reg_losses))
+
 
         # 进行编译
         model.compile(
@@ -119,9 +126,9 @@ if __name__ == "__main__":
             layer = model.get_layer(name)
             model.metrics_names.append(name)
             loss = (
-                tf.reduce_mean(layer.output, keepdims=True)
+                tf.reduce_mean(input_tensor=layer.output, keepdims=True)
                 * config.LOSS_WEIGHTS.get(name, 1.))
-            model.metrics_tensors.append(loss)
+            model.add_metric(loss, name=name, aggregation='mean')
 
 
         model.fit_generator(

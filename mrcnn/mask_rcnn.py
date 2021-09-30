@@ -9,7 +9,7 @@ from utils.config import Config
 from utils.anchors import get_anchors
 from utils.utils import mold_inputs,unmold_detections
 from utils import visualize
-import keras.backend as K
+import tensorflow.keras.backend as K
 from config import InferenceConfig
 
 class MASK_RCNN(object):

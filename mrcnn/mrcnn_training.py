@@ -1,11 +1,15 @@
 import tensorflow as tf
-import keras.backend as K
+import tensorflow.keras.backend as K
+import tensorflow.keras.layers as KL
+import tensorflow.keras.utils as KU
+from tensorflow.python.eager import context
 import random
 import numpy as np
 import logging
 from utils import utils
 from utils.anchors import compute_backbone_shapes,generate_pyramid_anchors
 
+tf.compat.v1.disable_eager_execution()
 #----------------------------------------------------------#
 #   损失函数公式们
 #----------------------------------------------------------#

@@ -1,11 +1,3 @@
-"""
-Mask R-CNN
-Common utility functions and classes.
-Copyright (c) 2017 Matterport, Inc.
-Licensed under the MIT License (see LICENSE for details)
-Written by Waleed Abdulla
-"""
-
 import sys
 import os
 import logging
@@ -21,6 +13,7 @@ import shutil
 import warnings
 from distutils.version import LooseVersion
 
+tf.compat.v1.disable_eager_execution()
 # URL from which to download the latest COCO trained weights
 COCO_MODEL_URL = "https://github.com/matterport/Mask_RCNN/releases/download/v2.0/mask_rcnn_coco.h5"
 
@@ -187,8 +180,8 @@ def box_refinement_graph(box, gt_box):
 
     dy = (gt_center_y - center_y) / height
     dx = (gt_center_x - center_x) / width
-    dh = tf.log(gt_height / height)
-    dw = tf.log(gt_width / width)
+    dh = tf.math.log(gt_height / height)
+    dw = tf.math.log(gt_width / width)
 
     result = tf.stack([dy, dx, dh, dw], axis=1)
     return result
@@ -729,8 +722,15 @@ def unmold_detections(detections, mrcnn_mask, original_image_shape,
 
 
 def norm_boxes_graph(boxes, shape):
-    """
-        用于进行标准化，限制到0-1之间
+    """Converts boxes from pixel coordinates to normalized coordinates.
+    boxes: [..., (y1, x1, y2, x2)] in pixel coordinates
+    shape: [..., (height, width)] in pixels
+
+    Note: In pixel coordinates (y2, x2) is outside the box. But in normalized
+    coordinates it's inside the box.
+
+    Returns:
+        [..., (y1, x1, y2, x2)] in normalized coordinates
     """
     h, w = tf.split(tf.cast(shape, tf.float32), 2)
     scale = tf.concat([h, w, h, w], axis=-1) - tf.constant(1.0)

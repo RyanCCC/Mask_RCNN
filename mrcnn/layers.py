@@ -1,7 +1,14 @@
 import tensorflow as tf
-from keras.engine import Layer
+import tensorflow.keras as keras
+import tensorflow.keras.backend as K
+import tensorflow.keras.layers as KL
+import tensorflow.keras.utils as KU
+from tensorflow.python.eager import context
+import tensorflow.keras.models as KM
 import numpy as np
 from utils import utils
+
+tf.compat.v1.disable_eager_execution()
 
 #----------------------------------------------------------#
 #   Proposal Layer
@@ -45,7 +52,7 @@ def clip_boxes_graph(boxes, window):
     clipped.set_shape((clipped.shape[0], 4))
     return clipped
 
-class ProposalLayer(Layer):
+class ProposalLayer(KL.Layer):
 
     def __init__(self, proposal_count, nms_threshold, config=None, **kwargs):
         super(ProposalLayer, self).__init__(**kwargs)
@@ -114,6 +121,10 @@ class ProposalLayer(Layer):
 
         proposals = utils.batch_slice([boxes, scores], nms,
                                       self.config.IMAGES_PER_GPU)
+        if not context.executing_eagerly():
+            # Infer the static output shape:
+            out_shape = self.compute_output_shape(None)
+            proposals.set_shape(out_shape)
         return proposals
 
     def compute_output_shape(self, input_shape):
@@ -128,7 +139,7 @@ class ProposalLayer(Layer):
 #----------------------------------------------------------#
 
 def log2_graph(x):
-    return tf.log(x) / tf.log(2.0)
+    return tf.math.log(x) / tf.math.log(2.0)
 
 def parse_image_meta_graph(meta):
     """
@@ -149,7 +160,7 @@ def parse_image_meta_graph(meta):
         "active_class_ids": active_class_ids,
     }
 
-class PyramidROIAlign(Layer):
+class PyramidROIAlign(KL.Layer):
     def __init__(self, pool_shape, **kwargs):
         super(PyramidROIAlign, self).__init__(**kwargs)
         self.pool_shape = tuple(pool_shape)
@@ -185,7 +196,7 @@ class PyramidROIAlign(Layer):
         # 分别在P2-P5中进行截取
         for i, level in enumerate(range(2, 6)):
             # 找到每个特征层对应box
-            ix = tf.where(tf.equal(roi_level, level))
+            ix = tf.compat.v1.where(tf.equal(roi_level, level))
             level_boxes = tf.gather_nd(boxes, ix)
             box_to_level.append(ix)
 
@@ -334,7 +345,7 @@ def norm_boxes_graph(boxes, shape):
     shift = tf.constant([0., 0., 1., 1.])
     return tf.divide(boxes - shift, scale)
 
-class DetectionLayer(Layer):
+class DetectionLayer(KL.Layer):
 
     def __init__(self, config=None, **kwargs):
         super(DetectionLayer, self).__init__(**kwargs)
@@ -414,14 +425,14 @@ def detection_targets_graph(proposals, gt_class_ids, gt_boxes, gt_masks, config)
     gt_boxes, non_zeros = trim_zeros_graph(gt_boxes, name="trim_gt_boxes")
     gt_class_ids = tf.boolean_mask(gt_class_ids, non_zeros,
                                    name="trim_gt_class_ids")
-    gt_masks = tf.gather(gt_masks, tf.where(non_zeros)[:, 0], axis=2,
+    gt_masks = tf.gather(gt_masks, tf.compat.v1.where(non_zeros)[:, 0], axis=2,
                          name="trim_gt_masks")
 
     # Handle COCO crowds
     # A crowd box in COCO is a bounding box around several instances. Exclude
     # them from training. A crowd box is given a negative class ID.
-    crowd_ix = tf.where(gt_class_ids < 0)[:, 0]
-    non_crowd_ix = tf.where(gt_class_ids > 0)[:, 0]
+    crowd_ix = tf.compat.v1.where(gt_class_ids < 0)[:, 0]
+    non_crowd_ix = tf.compat.v1.where(gt_class_ids > 0)[:, 0]
     crowd_boxes = tf.gather(gt_boxes, crowd_ix)
     gt_class_ids = tf.gather(gt_class_ids, non_crowd_ix)
     gt_boxes = tf.gather(gt_boxes, non_crowd_ix)
@@ -448,12 +459,12 @@ def detection_targets_graph(proposals, gt_class_ids, gt_boxes, gt_masks, config)
     # 取出最大33%的正样本
     positive_count = int(config.TRAIN_ROIS_PER_IMAGE *
                          config.ROI_POSITIVE_RATIO)
-    positive_indices = tf.random_shuffle(positive_indices)[:positive_count]
+    positive_indices = tf.random.shuffle(positive_indices)[:positive_count]
     positive_count = tf.shape(positive_indices)[0]
     # 保持正负样本比例
     r = 1.0 / config.ROI_POSITIVE_RATIO
     negative_count = tf.cast(r * tf.cast(positive_count, tf.float32), tf.int32) - positive_count
-    negative_indices = tf.random_shuffle(negative_indices)[:negative_count]
+    negative_indices = tf.random.shuffle(negative_indices)[:negative_count]
     # 获得正样本和负样本
     positive_rois = tf.gather(proposals, positive_indices)
     negative_rois = tf.gather(proposals, negative_indices)
@@ -527,7 +538,7 @@ def trim_zeros_graph(boxes, name='trim_zeros'):
     boxes = tf.boolean_mask(boxes, non_zeros, name=name)
     return boxes, non_zeros
 
-class DetectionTargetLayer(Layer):
+class DetectionTargetLayer(KL.Layer):
     """找到建议框的ground_truth
     Inputs:
     proposals: [batch, N, (y1, x1, y2, x2)]建议框

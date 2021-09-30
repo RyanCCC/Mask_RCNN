@@ -1,6 +1,4 @@
-import cv2
-import random
-import math
+import os
 import numpy as np
 from PIL import Image
 import yaml
@@ -39,9 +37,9 @@ class CustomerDataset(Dataset):
             img = imglist[i]
             if img.endswith(".jpg"):
                 img_name = img.split(".")[0]
-                img_path = img_floder + img
-                mask_path = mask_floder + img_name + ".png"
-                yaml_path = yaml_floder + img_name + ".yaml"
+                img_path = os.path.join(img_floder, img)
+                mask_path = os.path.join(mask_floder, img_name + ".png")
+                yaml_path = os.path.join(yaml_floder, img_name + ".yaml")
                 self.add_image(shape_name, image_id=i, path=img_path, mask_path=mask_path,yaml_path=yaml_path)
     #重写load_mask
     def load_mask(self, image_id):
