@@ -20,7 +20,7 @@ class CustomerConfig(Config):
     IMAGE_MIN_DIM = 512
     IMAGE_MAX_DIM = 512
     CLASSES = get_class('./data/shapes.names')
-    TRAIN_DATASET = './train_dataset'
+    TRAIN_DATASET = './train_data'
     PRETRAIN_MODEL = "model/mask_rcnn_coco.h5"
     LEARNING_RATE = 1e-5
     EPOCH = 100

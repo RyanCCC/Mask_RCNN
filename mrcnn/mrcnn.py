@@ -223,7 +223,7 @@ def get_predict_model(config):
 
     anchors = input_anchors
     # 建立RPN模型
-    rpn = build_rpn_model(len(config.RPN_ANCHOR_RATIOS), config.TOP_DOWN_PYRAMID_SIZE)
+    rpn = build_rpn_model(config.RPN_ANCHOR_STRIDE, len(config.RPN_ANCHOR_RATIOS), config.TOP_DOWN_PYRAMID_SIZE)
 
     rpn_class_logits, rpn_class, rpn_bbox = [],[],[]
 

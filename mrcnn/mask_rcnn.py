@@ -9,8 +9,11 @@ from utils.config import Config
 from utils.anchors import get_anchors
 from utils.utils import mold_inputs,unmold_detections
 from utils import visualize
+import tensorflow as tf
 import tensorflow.keras.backend as K
 from config import InferenceConfig
+
+tf.compat.v1.disable_eager_execution()
 
 class MASK_RCNN(object):
     _defaults = {
@@ -43,7 +46,6 @@ class MASK_RCNN(object):
     def __init__(self, **kwargs):
         self.__dict__.update(self._defaults)
         self.class_names = self._get_class()
-        self.sess = K.get_session()
         self.config = self._get_config()
         self.generate()
     #---------------------------------------------------#

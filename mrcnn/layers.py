@@ -275,13 +275,13 @@ def refine_detections_graph(rois, probs, deltas, window, config):
     refined_rois = clip_boxes_graph(refined_rois, window)
 
     # 去除背景
-    keep = tf.where(class_ids > 0)[:, 0]
+    keep = tf.compat.v1.where(class_ids > 0)[:, 0]
     # 去除背景和得分小的区域
     if config.DETECTION_MIN_CONFIDENCE:
-        conf_keep = tf.where(class_scores >= config.DETECTION_MIN_CONFIDENCE)[:, 0]
-        keep = tf.sets.set_intersection(tf.expand_dims(keep, 0),
+        conf_keep = tf.compat.v1.where(class_scores >= config.DETECTION_MIN_CONFIDENCE)[:, 0]
+        keep = tf.sets.intersection(tf.expand_dims(keep, 0),
                                         tf.expand_dims(conf_keep, 0))
-        keep = tf.sparse_tensor_to_dense(keep)[0]
+        keep = tf.sparse.to_dense(keep)[0]
 
     # 获得除去背景并且得分较高的框还有种类与得分
     # 1. Prepare variables
@@ -316,9 +316,9 @@ def refine_detections_graph(rois, probs, deltas, window, config):
     nms_keep = tf.reshape(nms_keep, [-1])
     nms_keep = tf.gather(nms_keep, tf.where(nms_keep > -1)[:, 0])
     # 4. Compute intersection between keep and nms_keep
-    keep = tf.sets.set_intersection(tf.expand_dims(keep, 0),
-                                    tf.expand_dims(nms_keep, 0))
-    keep = tf.sparse_tensor_to_dense(keep)[0]
+    keep = tf.sets.intersection(tf.expand_dims(keep, 0),
+                                        tf.expand_dims(nms_keep, 0))
+    keep = tf.sparse.to_dense(keep)[0]
 
     # 寻找得分最高的num_keep个框
     roi_count = config.DETECTION_MAX_INSTANCES
@@ -330,13 +330,13 @@ def refine_detections_graph(rois, probs, deltas, window, config):
     # Arrange output as [N, (y1, x1, y2, x2, class_id, score)]
     detections = tf.concat([
         tf.gather(refined_rois, keep),
-        tf.to_float(tf.gather(class_ids, keep))[..., tf.newaxis],
+        tf.dtypes.cast(tf.gather(class_ids, keep), tf.float32)[..., tf.newaxis],
         tf.gather(class_scores, keep)[..., tf.newaxis]
         ], axis=1)
 
     # 如果达不到数量的话就padding
     gap = config.DETECTION_MAX_INSTANCES - tf.shape(detections)[0]
-    detections = tf.pad(detections, [(0, gap), (0, 0)], "CONSTANT")
+    detections = tf.pad(tensor=detections, paddings=[(0, gap), (0, 0)], mode="CONSTANT")
     return detections
 
 def norm_boxes_graph(boxes, shape):
