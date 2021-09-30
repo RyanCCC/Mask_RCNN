@@ -399,7 +399,7 @@ def data_generator(dataset, config, shuffle=True, augment=False, augmentation=No
         batch_images[b] = utils.mold_image(image.astype(np.float32), config)
         batch_gt_class_ids[b, :gt_class_ids.shape[0]] = gt_class_ids
         batch_gt_boxes[b, :gt_boxes.shape[0]] = gt_boxes
-        batch_gt_masks[b, :, :, :gt_masks.shape[-1]] = gt_masks
+        batch_gt_masks[b, :, :, :gt_masks.shape[-1]] = gt_masks 
 
         b += 1
         
