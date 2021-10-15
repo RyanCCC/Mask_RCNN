@@ -1,8 +1,6 @@
 from mrcnn.mask_rcnn import MASK_RCNN
 from PIL import Image
 
-from mrcnn.mask_rcnn import MASK_RCNN
-from PIL import Image
 import tensorflow as tf
 import numpy as np
 from utils.anchors import get_anchors
