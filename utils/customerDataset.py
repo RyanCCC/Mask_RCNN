@@ -50,19 +50,17 @@ class CustomerDataset(Dataset):
                 yaml_path = os.path.join(yaml_floder, img_name + ".yaml")
                 self.add_image(shape_name, image_id=i, path=img_path, mask_path=mask_path,yaml_path=yaml_path)
     #重写load_mask
-    def load_mask(self, image_id):
+    def load_mask(self, image_id, train_mode = True):
         info = self.image_info[image_id]
-
-        # img = Image.open(info['mask_path'])
-        # num_obj = self.get_obj_index(img)
-        # mask = np.zeros([np.shape(img)[0], np.shape(img)[1], num_obj], dtype=np.uint8)
-        # mask = self.draw_mask(num_obj, mask, img, image_id)
-        '''
-        加载已经保存npz的mask
-        '''
-        mask = np.load(info['mask_path'])['arr_0']
-
-
+        if train_mode:
+            # 训练模式下加载npz数据
+            mask = np.load(info['mask_path'])['arr_0']
+        else:
+            # 生成npz函数
+            img = Image.open(info['mask_path'])
+            num_obj = self.get_obj_index(img)
+            mask = np.zeros([np.shape(img)[0], np.shape(img)[1], num_obj], dtype=np.uint8)
+            mask = self.draw_mask(num_obj, mask, img, image_id)
         labels=[]
         labels=self.from_yaml_get_class(image_id)
         class_ids = np.array([self.class_names.index(s) for s in labels])

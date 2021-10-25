@@ -23,7 +23,7 @@ dataset.prepare()
 # TODO: 多线程多进程优化
 image_ids = [id for id in dataset.image_ids]
 for imageid in image_ids:
-    dataset.load_mask(imageid)
+    dataset.load_mask(imageid, train_mode=False)
 
 
 
