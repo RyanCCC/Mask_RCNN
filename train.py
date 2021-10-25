@@ -30,7 +30,7 @@ if __name__ == "__main__":
     learning_rate = CustomerConfig.LEARNING_RATE
     init_epoch = 0
     epoch = CustomerConfig.EPOCH
-
+    
     dataset_root_path=CustomerConfig.TRAIN_DATASET
     img_floder =os.path.join(dataset_root_path, "imgs")
     mask_floder = os.path.join(dataset_root_path, "mask")
@@ -54,12 +54,12 @@ if __name__ == "__main__":
 
     # 训练数据集准备
     dataset_train = CustomerDataset()
-    dataset_train.load_shapes(config.NAME,len(train_imglist), config.CLASSES, img_floder, mask_floder, train_imglist, yaml_floder)
+    dataset_train.load_shapes(config.NAME,len(train_imglist), config.CLASSES, img_floder, mask_floder, train_imglist, yaml_floder, train_mode=True)
     dataset_train.prepare()
 
     # 验证数据集准备
     dataset_val = CustomerDataset()
-    dataset_val.load_shapes(config.NAME,len(val_imglist), config.CLASSES, img_floder, mask_floder, val_imglist, yaml_floder)
+    dataset_val.load_shapes(config.NAME,len(val_imglist), config.CLASSES, img_floder, mask_floder, val_imglist, yaml_floder, train_mode=True)
     dataset_val.prepare()
 
     # 获得训练模型
