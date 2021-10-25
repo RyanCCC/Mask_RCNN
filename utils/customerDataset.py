@@ -56,7 +56,7 @@ class CustomerDataset(Dataset):
             # 训练模式下加载npz数据
             mask = np.load(info['mask_path'])['arr_0']
         else:
-            # 生成npz函数
+            # 生成npz文件
             img = Image.open(info['mask_path'])
             num_obj = self.get_obj_index(img)
             mask = np.zeros([np.shape(img)[0], np.shape(img)[1], num_obj], dtype=np.uint8)
