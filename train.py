@@ -73,14 +73,19 @@ if __name__ == "__main__":
     val_generator = data_generator(dataset_val, config, shuffle=True,
                                     batch_size=config.BATCH_SIZE)
 
-    # 回执函数
-    # 每次训练一个世代都会保存
-    callbacks = [
-        tf.keras.callbacks.TensorBoard(log_dir=MODEL_DIR,
-                                    histogram_freq=0, write_graph=True, write_images=False),
-        tf.keras.callbacks.ModelCheckpoint(os.path.join(MODEL_DIR, "epoch{epoch:03d}_loss{loss:.3f}_val_loss{val_loss:.3f}.h5"),
-                                        verbose=0, save_weights_only=True),
-    ]
+    # 设置callbacks
+    tensorboard = tf.keras.callbacks.TensorBoard(log_dir=MODEL_DIR,histogram_freq=0, write_graph=True, write_images=False)
+    model_ckp= tf.keras.callbacks.ModelCheckpoint(os.path.join(MODEL_DIR, "building_new.h5"),verbose=0, save_weights_only=True)
+    early_stop = tf.keras.callbacks.EarlyStopping(monitor='val_loss', min_delta=0, patience=5, verbose=1)
+    learning_rate_reduce = tf.keras.callbacks.ReduceLROnPlateau(monitor='val_loss', factor=0.3, patience=3, verbose=1)
+    callbacks = [tensorboard, model_ckp, early_stop, learning_rate_reduce]
+    
+    # callbacks = [
+    #     tf.keras.callbacks.TensorBoard(log_dir=MODEL_DIR,
+    #                                 histogram_freq=0, write_graph=True, write_images=False),
+    #     tf.keras.callbacks.ModelCheckpoint(os.path.join(MODEL_DIR, "epoch{epoch:03d}_loss{loss:.3f}_val_loss{val_loss:.3f}.h5"),
+    #                                     verbose=0, save_weights_only=True),
+    # ]
 
 
     if True:
