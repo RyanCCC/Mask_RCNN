@@ -11,7 +11,7 @@ ret, ori_img = cv2.threshold(ori_img, 127, 255, cv2.THRESH_BINARY | cv2.THRESH_O
 # 连通域分析
 num_labels, labels, stats, centroids = cv2.connectedComponentsWithStats(ori_img, connectivity=8)
 
-
+regularization_contours = []
 # 遍历联通域
 for i in range(1, num_labels):
     img = np.zeros_like(labels)
@@ -20,10 +20,13 @@ for i in range(1, num_labels):
     img = np.array(img, dtype=np.uint8)
 
     regularization_contour =regularization.boundary_regularization(img).astype(np.int32)
-
-    cv2.polylines(img=ori_img1, pts=[regularization_contour], isClosed=True, color=(255, 0, 0), thickness=3)
+    regularization_contours.append(regularization_contour)
+    
     single_out = np.zeros_like(ori_img1)
     cv2.polylines(img=single_out, pts=[regularization_contour], isClosed=True, color=(255, 0, 0), thickness=3)
     cv2.imwrite('./result/single_out_{}.jpg'.format(i), single_out)
 
+
+
+cv2.polylines(img=ori_img1, pts=regularization_contours, isClosed=True, color=(255, 0, 0), thickness=3)
 cv2.imwrite('all_out.jpg', ori_img1)
