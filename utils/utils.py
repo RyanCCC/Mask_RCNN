@@ -680,14 +680,31 @@ def mold_inputs(config, images):
 
 def unmold_detections(detections, mrcnn_mask, original_image_shape,
                         image_shape, window):
+    '''
+    Reformats the detection of one image from the format of the neural network output to a format suitable for use in thre rest of the application
+    params:
+        detections: [N, (y1, x1, y2, x2, class_id, score)] in normalize coordinates
+        mrcnn_mask: [N, height, wdidht, num_classes]
+        original_image_shape: [H, W, C] Original image shape before resizing
+        image_shape: [H, W, C] Shape of the image after resizing and padding
+        window: [y1, x1, y2, x2] Pixel coordinates of box in the image where the real image is excluding the padding
+
+    Returns:
+        boxes:[N, (y1, x1, y2, x2)] Bounding boxes in pixels
+        class_ids: [N] Integer class IDs for each bounding box
+        scores: [N] Float probability scores of the class_id
+        masks: [height, width, num_instances] Instance masks
+    '''
+    # how many detection do we have? Detections array is padded with zeros. Find the first class_id==0
     zero_ix = np.where(detections[:, 4] == 0)[0]
+    # N就是在待检测的图像中检测到多少个对象
     N = zero_ix[0] if zero_ix.shape[0] > 0 else detections.shape[0]
 
     boxes = detections[:N, :4]
     class_ids = detections[:N, 4].astype(np.int32)
     scores = detections[:N, 5]
     masks = mrcnn_mask[np.arange(N), :, :, class_ids]
-
+    # translate normalized coordinates in the resized image to pixel, coordinates in the original image before resizing
     window = norm_boxes(window, image_shape[:2])
 
     wy1, wx1, wy2, wx2 = window
@@ -707,7 +724,7 @@ def unmold_detections(detections, mrcnn_mask, original_image_shape,
         scores = np.delete(scores, exclude_ix, axis=0)
         masks = np.delete(masks, exclude_ix, axis=0)
         N = class_ids.shape[0]
-
+    # Resize masks to original image size and set boundary threshold.
     full_masks = []
     for i in range(N):
 

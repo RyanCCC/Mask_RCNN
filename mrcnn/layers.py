@@ -53,6 +53,12 @@ def clip_boxes_graph(boxes, window):
     return clipped
 
 class ProposalLayer(KL.Layer):
+    '''
+    1. 根据rpn网络，获取score靠前的前6000个anchor
+    2. 利用rpn_bbox对anchors进行修正
+    3. 舍弃掉修正后边框超过图像大小的anchor
+    4. 利用非极大值的方法获取最后的anchor
+    '''
 
     def __init__(self, proposal_count, nms_threshold, config=None, **kwargs):
         super(ProposalLayer, self).__init__(**kwargs)
@@ -61,25 +67,19 @@ class ProposalLayer(KL.Layer):
         self.nms_threshold = nms_threshold
     # [rpn_class, rpn_bbox, anchors]
     def call(self, inputs):
-
         # 代表这个先验框内部是否有物体[batch, num_rois, 1]
         scores = inputs[0][:, :, 1]
-
         # 代表这个先验框的调整参数[batch, num_rois, 4]
         deltas = inputs[1]
-
         # [0.1 0.1 0.2 0.2]，改变数量级
         deltas = deltas * np.reshape(self.config.RPN_BBOX_STD_DEV, [1, 1, 4])
-
         # Anchors
         anchors = inputs[2]
-
         # 筛选出得分前6000个的框
         pre_nms_limit = tf.minimum(self.config.PRE_NMS_LIMIT, tf.shape(anchors)[1])
         # 获得这些框的索引
         ix = tf.nn.top_k(scores, pre_nms_limit, sorted=True,
                          name="top_anchors").indices
-        
         # 获得这些框的得分
         scores = utils.batch_slice([scores, ix], lambda x, y: tf.gather(x, y),
                                    self.config.IMAGES_PER_GPU)
@@ -549,7 +549,7 @@ class DetectionTargetLayer(KL.Layer):
     rois: [batch, TRAIN_ROIS_PER_IMAGE, (y1, x1, y2, x2)]内部真实存在目标的建议框
     target_class_ids: [batch, TRAIN_ROIS_PER_IMAGE]每个建议框对应的类
     target_deltas: [batch, TRAIN_ROIS_PER_IMAGE, (dy, dx, log(dh), log(dw)]每个建议框应该有的调整参数
-    target_mask: [batch, TRAIN_ROIS_PER_IMAGE, height, width]每个建议框语义分割情况
+    target_mask: [batch, TRAIN_ROIS_PER_IMAGE, height, width]每个建议框语义分割情况， resize成28*28
     """
 
     def __init__(self, config, **kwargs):
