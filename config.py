@@ -17,7 +17,6 @@ class CustomerConfig(Config):
     CLASSES = get_class('./data/shapes.names')
     TRAIN_DATASET = './train_data'
     PRETRAIN_MODEL = "model/mask_rcnn_coco.h5"
-    VALIDATION_STEPS = 50
     LEARNING_RATE = 1e-5
     EPOCH = 100
 
