@@ -128,6 +128,7 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
+<<<<<<< HEAD
 # pre-train checkpoint
 *.h5
 
@@ -137,3 +138,8 @@ dmypy.json
 train_data
 
 logs
+=======
+*.h5
+
+.history
+>>>>>>> main
