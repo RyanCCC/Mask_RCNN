@@ -10,9 +10,7 @@ from utils import utils
 from utils.anchors import compute_backbone_shapes,generate_pyramid_anchors
 
 tf.compat.v1.disable_eager_execution()
-#----------------------------------------------------------#
-#   损失函数公式们
-#----------------------------------------------------------#
+
 def batch_pack_graph(x, counts, num_rows):
     outputs = []
     for i in range(num_rows):
@@ -32,16 +30,11 @@ def rpn_class_loss_graph(rpn_match, rpn_class_logits):
     """
     建议框分类损失函数
     """
-    # 在最后一维度添加一维度
     rpn_match = tf.squeeze(rpn_match, -1)
-    # 获得正样本
     anchor_class = K.cast(K.equal(rpn_match, 1), tf.int32)
-    # 获得未被忽略的样本
     indices = tf.where(K.not_equal(rpn_match, 0))
-    # 获得预测结果和实际结果
     rpn_class_logits = tf.gather_nd(rpn_class_logits, indices)
     anchor_class = tf.gather_nd(anchor_class, indices)
-    # 计算二者之间的交叉熵
     loss = K.sparse_categorical_crossentropy(target=anchor_class,
                                              output=rpn_class_logits,
                                              from_logits=True)
@@ -53,14 +46,9 @@ def rpn_bbox_loss_graph(config, target_bbox, rpn_match, rpn_bbox):
     """
     建议框回归损失
     """
-    # 在最后一维度添加一维度
     rpn_match = K.squeeze(rpn_match, -1)
-
-    # 获得正样本
     indices = tf.where(K.equal(rpn_match, 1))
-    # 获得预测结果与实际结果
     rpn_bbox = tf.gather_nd(rpn_bbox, indices)
-    # 将目标边界框修剪为与rpn_bbox相同的长度。
     batch_counts = K.sum(K.cast(K.equal(rpn_match, 1), tf.int32), axis=1)
     target_bbox = batch_pack_graph(target_bbox, batch_counts,
                                    config.IMAGES_PER_GPU)
@@ -76,19 +64,13 @@ def mrcnn_class_loss_graph(target_class_ids, pred_class_logits,
     """
     classifier的分类损失函数
     """
-    # 目标信息
     target_class_ids = tf.cast(target_class_ids, 'int64')
-    # 预测信息
     pred_class_ids = tf.argmax(pred_class_logits, axis=2)
     pred_active = tf.gather(active_class_ids[0], pred_class_ids)
-    # 求二者交叉熵损失
     loss = tf.nn.sparse_softmax_cross_entropy_with_logits(
         labels=target_class_ids, logits=pred_class_logits)
 
-    # 去除无用的损失
     loss = loss * pred_active
-
-    # 求平均
     loss = tf.reduce_sum(loss) / tf.maximum(tf.reduce_sum(pred_active), 1)
     return loss
 
@@ -149,18 +131,13 @@ def mrcnn_mask_loss_graph(target_masks, target_class_ids, pred_masks):
     loss = K.mean(loss)
     return loss
 
-#----------------------------------------------------------#
-#   损失函数公式们
-#----------------------------------------------------------#
 def load_image_gt(dataset, config, image_id, augment=False, augmentation=None,
                   use_mini_mask=False):
     # 载入图片和语义分割效果
     image = dataset.load_image(image_id)
     mask, class_ids = dataset.load_mask(image_id)
     # print("\nbefore:",image_id,np.shape(mask),np.shape(class_ids))
-    # 原始shape
     original_shape = image.shape
-    # 获得新图片，原图片在新图片中的位置，变化的尺度，填充的情况等
     image, window, scale, padding, crop = utils.resize_image(
         image,
         min_dim=config.IMAGE_MIN_DIM,
@@ -168,9 +145,7 @@ def load_image_gt(dataset, config, image_id, augment=False, augmentation=None,
         max_dim=config.IMAGE_MAX_DIM,
         mode=config.IMAGE_RESIZE_MODE)
     mask = utils.resize_mask(mask, scale, padding, crop)
-    # print("\nafter:",np.shape(mask),np.shape(class_ids))
-    # print(np.shape(image),np.shape(mask))
-    # 可以把图片进行翻转
+    # 图像翻转
     if augment:
         logging.warning("'augment' is deprecated. Use 'augmentation' instead.")
         if random.randint(0, 1):
@@ -179,7 +154,7 @@ def load_image_gt(dataset, config, image_id, augment=False, augmentation=None,
 
     if augmentation:
         import imgaug
-        # 可用于图像增强
+        # 图像增强
         MASK_AUGMENTERS = ["Sequential", "SomeOf", "OneOf", "Sometimes",
                            "Fliplr", "Flipud", "CropAndPad",
                            "Affine", "PiecewiseAffine"]
@@ -231,10 +206,7 @@ def build_rpn_targets(image_shape, anchors, gt_class_ids, gt_boxes, config):
 
     '''
     iscrowd=0的时候，表示这是一个单独的物体，轮廓用Polygon(多边形的点)表示，
-    iscrowd=1的时候表示两个没有分开的物体，轮廓用RLE编码表示，比如说一张图片里面有三个人，
-    一个人单独站一边，另外两个搂在一起（标注的时候距离太近分不开了），这个时候，
-    单独的那个人的注释里面的iscrowing=0,segmentation用Polygon表示，
-    而另外两个用放在同一个anatation的数组里面用一个segmention的RLE编码形式表示
+    iscrowd=1的时候表示两个没有分开的物体，轮廓用RLE编码表示
     '''
     crowd_ix = np.where(gt_class_ids < 0)[0]
     if crowd_ix.shape[0] > 0:

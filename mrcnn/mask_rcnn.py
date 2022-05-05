@@ -1,16 +1,11 @@
 import os
 import numpy as np
-import skimage.io
-from PIL import Image
-import matplotlib
-import matplotlib.pyplot as plt
-from .mrcnn import get_predict_model
+from .mrcnn import get_model
 from utils.config import Config
 from utils.anchors import get_anchors
 from utils.utils import mold_inputs,unmold_detections
 from utils import visualize
 import tensorflow as tf
-import tensorflow.keras.backend as K
 from config import InferenceConfig
 
 tf.compat.v1.disable_eager_execution()
@@ -40,17 +35,12 @@ class MASK_RCNN(object):
         else:
             return "Unrecognized attribute name '" + n + "'"
 
-    #---------------------------------------------------#
-    #   初始化Mask-Rcnn
-    #---------------------------------------------------#
     def __init__(self, **kwargs):
         self.__dict__.update(self._defaults)
         self.class_names = self._get_class()
         self.config = self._get_config()
         self.generate()
-    #---------------------------------------------------#
-    #   获得所有的分类
-    #---------------------------------------------------#
+
     def _get_class(self):
         classes_path = os.path.expanduser(self.classes_path)
         with open(classes_path) as f:
@@ -74,9 +64,7 @@ class MASK_RCNN(object):
         config.display()
         return config
 
-    #---------------------------------------------------#
-    #   生成模型
-    #---------------------------------------------------#
+
     def generate(self):
         model_path = os.path.expanduser(self.model_path)
         assert model_path.endswith('.h5'), 'Keras model or weights must be a .h5 file.'
@@ -86,12 +74,10 @@ class MASK_RCNN(object):
 
         # 载入模型，如果原来的模型里已经包括了模型结构则直接载入。
         # 否则先构建模型再载入
-        self.model = get_predict_model(self.config)
+        self.model = get_model(self.config, training=False)
         self.model.load_weights(self.model_path,by_name=True)
     
-    #---------------------------------------------------#
-    #   检测图片
-    #---------------------------------------------------#
+
     def detect_image(self, image):
         image = [np.array(image)]
         molded_images, image_metas, windows = mold_inputs(self.config,image)

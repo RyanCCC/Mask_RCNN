@@ -10,11 +10,11 @@ def get_class(classes_path):
 
 class CustomerConfig(Config):
     NAME = "Customer"
-    NUM_CLASSES = 1 + 3
+    NUM_CLASSES = 1 + 1
     RPN_ANCHOR_SCALES = (16, 32, 64, 128, 256)
-    IMAGE_MIN_DIM = 512
-    IMAGE_MAX_DIM = 512
-    CLASSES = get_class('./data/shapes.names')
+    # IMAGE_MIN_DIM = 512
+    # IMAGE_MAX_DIM = 512
+    CLASSES = get_class(r'D:\Code\AGCIMAIGit\Mask_RCNN\data\building.names')
     TRAIN_DATASET = './train_data'
     PRETRAIN_MODEL = "model/mask_rcnn_coco.h5"
     LEARNING_RATE = 1e-5
@@ -25,5 +25,5 @@ class InferenceConfig(Config):
     RPN_ANCHOR_SCALES = (16, 32, 64, 128, 256)
     IMAGE_MIN_DIM = 512
     IMAGE_MAX_DIM = 512
-    model = './logs/test.h5'
-    classes_path = './data/shapes.names'
+    model = r'D:\Code\AGCIMAIGit\Mask_RCNN\logs\village_building.h5'
+    classes_path = r'D:\Code\AGCIMAIGit\Mask_RCNN\data\building.names'

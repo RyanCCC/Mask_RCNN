@@ -6,7 +6,7 @@ import tensorflow as tf
 from utils import visualize
 from utils.anchors import get_anchors
 from utils.utils import mold_inputs,unmold_detections
-from mrcnn.mrcnn import get_train_model,get_predict_model
+from mrcnn.mrcnn import get_model
 from mrcnn.mrcnn_training import data_generator,load_image_gt
 from utils.customerDataset import CustomerDataset
 from config import CustomerConfig
@@ -63,7 +63,7 @@ if __name__ == "__main__":
     dataset_val.prepare()
 
     # 获得训练模型
-    model = get_train_model(config)
+    model = get_model(config, training=True)
     model.summary()
     model.load_weights(COCO_MODEL_PATH,by_name=True,skip_mismatch=True)
 
