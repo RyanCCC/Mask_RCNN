@@ -128,13 +128,10 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-# pre-train checkpoint
 *.h5
 
-# viscode history extension
 .history
-
-train_data
 
 logs
 
+train_data
