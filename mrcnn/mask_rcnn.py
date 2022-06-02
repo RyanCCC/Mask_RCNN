@@ -76,6 +76,8 @@ class MASK_RCNN(object):
         # 否则先构建模型再载入
         self.model = get_model(self.config, training=False)
         self.model.load_weights(self.model_path,by_name=True)
+        # 导出模型
+        # self.model.save('./village_building', save_format='tf')
     
 
     def detect_image(self, image):

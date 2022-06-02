@@ -1,6 +1,9 @@
 import numpy as np
 import cv2
 from PIL import Image
+from mrcnn.mask_rcnn import MASK_RCNN
+
+mrcnn = MASK_RCNN()
 
 '''
 图像分割评价指标：
