@@ -3,6 +3,9 @@ import tensorflow as tf
 import numpy as np
 import config
 import os
+from mrcnn.mask_rcnn import MASK_RCNN
+
+
 
 '''
 语义分割评价指标MIoU，PixelAccuracy
@@ -127,7 +130,7 @@ if __name__ == '__main__':
     class_path = './data/building.names'
     class_names = config.get_class(class_path)
     n_classes = len(class_names)
-    from inference import mask_rcnn
+    mask_rcnn = MASK_RCNN()
     result_img, pred_img = mask_rcnn.detect_image(image=image)
     result_img.show()
     evaluate = Evaluator(n_classes)

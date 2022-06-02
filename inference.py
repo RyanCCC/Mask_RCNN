@@ -10,7 +10,6 @@ from utils.config import Config
 import os
 
 img = './images/20210604105809.jpg'
-mask_rcnn = MASK_RCNN()
 
 # def get_class(classes_path):
 #         classes_path = os.path.expanduser(classes_path)
@@ -69,7 +68,7 @@ mask_rcnn = MASK_RCNN()
 # drawed_image.show()
 
 img = './images/2.jpg'
-
+mask_rcnn = MASK_RCNN()
 img = Image.open(img)
 image = mask_rcnn.detect_image(image = img)
 image.show()
