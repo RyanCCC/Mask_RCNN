@@ -1,4 +1,5 @@
 import os
+from PIL import Image
 import numpy as np
 from .mrcnn import get_model
 from utils.config import Config
@@ -106,7 +107,10 @@ class MASK_RCNN(object):
         # 想要保存处理后的图片请查询plt保存图片的方法。
         drawed_image = visualize.display_instances(image[0], r['rois'], r['masks'], r['class_ids'], 
                                     self.class_names, r['scores'])
-        return drawed_image
+        # 处理mask 文件
+        mask_image = np.any(r['masks'], axis=-1)
+        mask_image = Image.fromarray(mask_image)
+        return drawed_image, mask_image
         
     def close_session(self):
         self.sess.close()
