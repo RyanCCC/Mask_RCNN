@@ -1,9 +1,18 @@
+import cv2
+import tensorflow as tf
+import numpy as np
+import config
+import os
+
+'''
+语义分割评价指标MIoU，PixelAccuracy
+MIoU: 表示平均类别的交并比
+PixelAccuracy: 表示像素正确分类的数量
+'''
+
 import numpy as np
 import cv2
 from PIL import Image
-from mrcnn.mask_rcnn import MASK_RCNN
-
-mrcnn = MASK_RCNN()
 
 '''
 图像分割评价指标：
@@ -107,15 +116,24 @@ class Evaluator(object):
 
 
 if __name__ == '__main__':
+    image_name = '0.jpg'
+    mask_name = '0.png'
+    ori_img = os.path.join('./train_dataset/imgs', image_name)
+    mask_img = os.path.join('./train_dataset/mask', mask_name)
+    image = Image.open(ori_img)
+    if image is not 'RGB':
+        image = image.convert('RGB')
+    mask_img = Image.open(mask_img)
+    class_path = './data/building.names'
+    class_names = config.get_class(class_path)
+    n_classes = len(class_names)
+    from inference import mask_rcnn
+    result_img, pred_img = mask_rcnn.detect_image(image=image)
+    result_img.show()
+    evaluate = Evaluator(n_classes)
+    acc = Evaluator.add_batch(mask_img, pred_img)
+    acc = evaluate.Pixel_Accuracy()
 
-    pred_img = './train_data/1.png'
-    ground_true = './train_data/20211229095227_ground.jpg'
-    img = cv2.imread(pred_img)
-
-    img = Image.open(pred_img)
 
 
-    # 展示图像
-    cv2.namedWindow('test')
-    cv2.imshow('test', img)
-    cv2.waitKey(0)
+
