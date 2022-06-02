@@ -14,7 +14,7 @@ class CustomerConfig(Config):
     RPN_ANCHOR_SCALES = (16, 32, 64, 128, 256)
     # IMAGE_MIN_DIM = 512
     # IMAGE_MAX_DIM = 512
-    CLASSES = get_class(r'.\data\building.names')
+    CLASSES = get_class(r'.\data\coco_classes.txt')
     TRAIN_DATASET = './train_data'
     PRETRAIN_MODEL = "model/mask_rcnn_coco.h5"
     LEARNING_RATE = 1e-5

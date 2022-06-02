@@ -4,17 +4,6 @@ import numpy as np
 import config
 import os
 from mrcnn.mask_rcnn import MASK_RCNN
-
-
-
-'''
-语义分割评价指标MIoU，PixelAccuracy
-MIoU: 表示平均类别的交并比
-PixelAccuracy: 表示像素正确分类的数量
-'''
-
-import numpy as np
-import cv2
 from PIL import Image
 
 '''
@@ -121,13 +110,13 @@ class Evaluator(object):
 if __name__ == '__main__':
     image_name = '0.jpg'
     mask_name = '0.png'
-    ori_img = os.path.join('./train_dataset/imgs', image_name)
-    mask_img = os.path.join('./train_dataset/mask', mask_name)
+    ori_img = os.path.join('./train_data/imgs', image_name)
+    mask_img = os.path.join('./train_data/mask', mask_name)
     image = Image.open(ori_img)
     if image is not 'RGB':
         image = image.convert('RGB')
     mask_img = Image.open(mask_img)
-    class_path = './data/building.names'
+    class_path = './data/coco_classes.txt'
     class_names = config.get_class(class_path)
     n_classes = len(class_names)
     mask_rcnn = MASK_RCNN()
