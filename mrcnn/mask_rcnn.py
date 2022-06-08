@@ -38,11 +38,11 @@ class MASK_RCNN(object):
 
     def __init__(self, **kwargs):
         self.__dict__.update(self._defaults)
-        self.class_names = self._get_class()
+        self.class_names = self.get_class()
         self.config = self._get_config()
         self.generate()
 
-    def _get_class(self):
+    def get_class(self):
         classes_path = os.path.expanduser(self.classes_path)
         with open(classes_path) as f:
             class_names = f.readlines()

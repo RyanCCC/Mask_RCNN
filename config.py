@@ -23,7 +23,7 @@ class CustomerConfig(Config):
 class InferenceConfig(Config):
     NAME = 'Customer'
     RPN_ANCHOR_SCALES = (16, 32, 64, 128, 256)
-    IMAGE_MIN_DIM = 512
-    IMAGE_MAX_DIM = 512
-    model = r'.\model\mask_rcnn_coco.h5'
-    classes_path = r'.\data\coco_classes.txt'
+    IMAGE_MIN_DIM = 1024
+    IMAGE_MAX_DIM = 1024
+    model = r'.\model\village_building.h5'
+    classes_path = r'.\data\building.names'

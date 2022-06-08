@@ -108,23 +108,30 @@ class Evaluator(object):
 
 
 if __name__ == '__main__':
-    image_name = '0.jpg'
-    mask_name = '0.png'
-    ori_img = os.path.join('./train_data/imgs', image_name)
-    mask_img = os.path.join('./train_data/mask', mask_name)
+    ori_img = './train_data/20211229095227.jpg'
+    gt_img = './train_data/20211229095227.png'
+    pred_img = './train_data/save.png'
     image = Image.open(ori_img)
-    if image is not 'RGB':
-        image = image.convert('RGB')
-    mask_img = Image.open(mask_img)
-    class_path = './data/coco_classes.txt'
-    class_names = config.get_class(class_path)
-    n_classes = len(class_names)
-    mask_rcnn = MASK_RCNN()
-    result_img, pred_img = mask_rcnn.detect_image(image=image)
-    result_img.show()
-    evaluate = Evaluator(n_classes)
-    acc = Evaluator.add_batch(mask_img, pred_img)
+    gt_img = Image.open(gt_img)
+    pred_img = Image.open(pred_img)
+
+    gt_img = np.array(gt_img)
+    gt_img = np.where(gt_img>0, 0, 255)
+    pred_img = np.array(pred_img)
+    # mask_rcnn = MASK_RCNN()
+    # class_names = mask_rcnn.get_class()
+    # n_classes = len(class_names)
+    # result_img, pred_img = mask_rcnn.detect_image(image=image)
+    # result_img.show()
+    evaluate = Evaluator(1)
+    evaluate.add_batch(gt_img, pred_img)
     acc = evaluate.Pixel_Accuracy()
+    print(acc)
+
+
+    # iou计算
+    iou = IoU_calculate(pred_img, gt_img, 1)
+    print(iou)
 
 
 
