@@ -11,7 +11,7 @@ from PIL import Image
 mIoU：类别平均交并比
 PixelAccuracy：像素精度，标记正确的像素占总像素的比例
 Mean Pixel accuracy：平均像素精度，每个类内被正确分类像素数的比例
-
+参考：https://zhuanlan.zhihu.com/p/61880018 
 '''
 
 def IoU_calculate(pred, target, n_classes):
@@ -99,6 +99,9 @@ class Evaluator(object):
         return confusion_matrix
 
     def add_batch(self, gt_image, pre_image):
+        '''
+        输入的图像用0,1,2,3...表示类别
+        '''
         assert gt_image.shape == pre_image.shape
         self.confusion_matrix += self._generate_matrix(gt_image, pre_image)
 
@@ -114,16 +117,16 @@ if __name__ == '__main__':
     image = Image.open(ori_img)
     gt_img = Image.open(gt_img)
     pred_img = Image.open(pred_img)
-
+    pred_img = np.where(pred_img, 0, 1)
     gt_img = np.array(gt_img)
-    gt_img = np.where(gt_img>0, 0, 255)
+    gt_img = np.where(gt_img>0, 0, 1)
     pred_img = np.array(pred_img)
     # mask_rcnn = MASK_RCNN()
     # class_names = mask_rcnn.get_class()
     # n_classes = len(class_names)
     # result_img, pred_img = mask_rcnn.detect_image(image=image)
     # result_img.show()
-    evaluate = Evaluator(1)
+    evaluate = Evaluator(2)
     evaluate.add_batch(gt_img, pred_img)
     acc = evaluate.Pixel_Accuracy()
     print(acc)
