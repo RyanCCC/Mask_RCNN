@@ -3,8 +3,6 @@ import os
 
 from utils.customerDataset import CustomerDataset
 
-
-CustomerConfig.TRAIN_DATASET = r'D:\Code\AGCIMAIGit\Mask_RCNN\train_dataset'
 dataset_root_path = CustomerConfig.TRAIN_DATASET
 img_floder =os.path.join(dataset_root_path, "imgs")
 mask_floder = os.path.join(dataset_root_path, "mask")
