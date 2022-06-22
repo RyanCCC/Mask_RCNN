@@ -36,6 +36,17 @@ config文件包含两个，一个是在```utils```文件夹下的```config.py```
 
 修改config文件后运行```inference.py```文件即可。
 
+
+## 调试问题
+
+1. `Input image dtype is bool. Interpolation is not defined with bool data type`
+
+![image](https://user-images.githubusercontent.com/27406337/174923521-cf42e985-007b-44ef-b00c-20d78a95ac1e.png)
+
+参考：[Input image dtype is bool. Interpolation is not defined with bool data type](https://stackoverflow.com/questions/62330374/input-image-dtype-is-bool-interpolation-is-not-defined-with-bool-data-type):`pip install -U scikit-image==0.16.2`
+
+
+
 ## 参考
 
 1. [Mask RCNN源码解读](https://blog.csdn.net/u012655441/article/details/122304099)
