@@ -19,6 +19,8 @@ class CustomerConfig(Config):
     PRETRAIN_MODEL = "model/mask_rcnn_coco.h5"
     LEARNING_RATE = 1e-5
     EPOCH = 100
+    MAX_GT_INSTANCES = 200
+    DETECTION_MAX_INSTANCES = 200
 
 class InferenceConfig(Config):
     NAME = 'Customer'
