@@ -46,20 +46,15 @@ class Dataset(object):
         def clean_name(name):
             """Returns a shorter version of object names for cleaner display."""
             return ",".join(name.split(",")[:1])
-        # 分多少类
+        # 类别数
         self.num_classes = len(self.class_info)
-        # 种类的id
         self.class_ids = np.arange(self.num_classes)
-        # 搞个简称出来，用于显示
         self.class_names = [clean_name(c["name"]) for c in self.class_info]
 
-        # 计算一共有多少个图片
         self.num_images = len(self.image_info)
 
-        # 图片的id
         self._image_ids = np.arange(self.num_images)
 
-        # 从源类和图像id到内部id的映射
         self.class_from_source_map = {"{}.{}".format(info['source'], info['id']): id
                                       for info, id in zip(self.class_info, self.class_ids)}
         self.image_from_source_map = {"{}.{}".format(info['source'], info['id']): id
