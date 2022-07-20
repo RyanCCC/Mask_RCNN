@@ -36,6 +36,8 @@ config文件包含两个，一个是在```utils```文件夹下的```config.py```
 
 修改config文件后运行```inference.py```文件即可。
 
+ONNX推理可以参考：[Deployment:MaskRCNN](https://github.com/RyanCCC/Deployment/tree/main/MaskRCNN)
+
 
 ## 调试问题
 
