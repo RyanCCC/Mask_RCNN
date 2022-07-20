@@ -73,12 +73,11 @@ class MASK_RCNN(object):
         # 计算总的种类
         self.num_classes = len(self.class_names)
 
-        # 载入模型，如果原来的模型里已经包括了模型结构则直接载入。
-        # 否则先构建模型再载入
+        # 载入模型
         self.model = get_model(self.config, training=False)
         self.model.load_weights(self.model_path,by_name=True)
         # 导出模型
-        # self.model.save('./village_building', save_format='tf')
+        # self.model.save('./maskrcnn_coco', save_format='tf')
     
 
     def detect_image(self, image):
