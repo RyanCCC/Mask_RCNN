@@ -9,7 +9,7 @@ import logging
 from utils import utils
 from utils.anchors import compute_backbone_shapes,generate_pyramid_anchors
 
-tf.compat.v1.disable_eager_execution()
+# tf.compat.v1.disable_eager_execution()
 
 def batch_pack_graph(x, counts, num_rows):
     outputs = []

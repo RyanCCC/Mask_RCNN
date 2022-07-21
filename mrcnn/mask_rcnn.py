@@ -9,35 +9,20 @@ from utils import visualize
 import tensorflow as tf
 from config import InferenceConfig
 
-tf.compat.v1.disable_eager_execution()
+# tf.compat.v1.disable_eager_execution()
 
 class MASK_RCNN(object):
-    _defaults = {
-        "model_path": InferenceConfig.model,
-        "classes_path": InferenceConfig.classes_path,
-        "confidence": 0.7,
-
-        # 使用coco数据集检测的时候，IMAGE_MIN_DIM=1024，IMAGE_MAX_DIM=1024, RPN_ANCHOR_SCALES=(32, 64, 128, 256, 512)
-        "RPN_ANCHOR_SCALES": InferenceConfig.RPN_ANCHOR_SCALES,
-        "IMAGE_MIN_DIM": InferenceConfig.IMAGE_MIN_DIM,
-        "IMAGE_MAX_DIM": InferenceConfig.IMAGE_MAX_DIM,
-        
-        # 在使用自己的数据集进行训练的时候，如果显存不足要调小图片大小
-        # 同时要调小anchors
-        #"IMAGE_MIN_DIM": 512,
-        #"IMAGE_MAX_DIM": 512,
-        #"RPN_ANCHOR_SCALES": (16, 32, 64, 128, 256)
-    }
-
-    @classmethod
-    def get_defaults(cls, n):
-        if n in cls._defaults:
-            return cls._defaults[n]
-        else:
-            return "Unrecognized attribute name '" + n + "'"
 
     def __init__(self, **kwargs):
-        self.__dict__.update(self._defaults)
+        self.model_path = kwargs['model']
+        self.classes_path= kwargs['classes_path']
+        self.confidence = kwargs['confidence']
+
+        # 使用coco数据集检测的时候，IMAGE_MIN_DIM=1024，IMAGE_MAX_DIM=1024, RPN_ANCHOR_SCALES=(32, 64, 128, 256, 512)
+        self.RPN_ANCHOR_SCALES = InferenceConfig.RPN_ANCHOR_SCALES
+        self.IMAGE_MIN_DIM = InferenceConfig.IMAGE_MIN_DIM
+        self.IMAGE_MAX_DIM = InferenceConfig.IMAGE_MAX_DIM
+
         self.class_names = self.get_class()
         self.config = self._get_config()
         self.generate()
@@ -76,7 +61,6 @@ class MASK_RCNN(object):
         # 载入模型
         self.model = get_model(self.config, training=False)
         self.model.load_weights(self.model_path,by_name=True)
-        # 导出模型
         # self.model.save('./maskrcnn_coco', save_format='tf')
     
 

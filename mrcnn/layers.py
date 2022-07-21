@@ -8,7 +8,7 @@ import tensorflow.keras.models as KM
 import numpy as np
 from utils import utils
 
-tf.compat.v1.disable_eager_execution()
+# tf.compat.v1.disable_eager_execution()
 
 #----------------------------------------------------------#
 #   Proposal Layer

@@ -11,7 +11,7 @@ from mrcnn.mrcnn_training import data_generator,load_image_gt
 from utils.customerDataset import CustomerDataset
 from config import CustomerConfig
 
-tf.compat.v1.disable_eager_execution()
+# tf.compat.v1.disable_eager_execution()
 
 def log(text, array=None):
     if array is not None:

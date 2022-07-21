@@ -13,7 +13,7 @@ import tensorflow.keras.models as KM
 from mrcnn.restnet import get_resnet
 
 
-tf.compat.v1.disable_eager_execution()
+# tf.compat.v1.disable_eager_execution()
 
 
 def rpn_graph(feature_map, anchors_per_location, anchor_stride):

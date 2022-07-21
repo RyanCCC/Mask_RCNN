@@ -27,5 +27,5 @@ class InferenceConfig(Config):
     RPN_ANCHOR_SCALES = (16, 32, 64, 128, 256)
     IMAGE_MIN_DIM = 1024
     IMAGE_MAX_DIM = 1024
-    model = r'.\model\mask_rcnn_coco.h5'
-    classes_path = r'.\data\coco_classes.txt'
+    model = r'.\model\village_building.h5'
+    classes_path = r'.\data\building.names'

@@ -6,8 +6,8 @@ import numpy as np
 from utils.anchors import get_anchors
 from utils.utils import mold_inputs,unmold_detections
 from utils import visualize
-from utils.config import Config
 import os
+from config import InferenceConfig
 
 img = './images/20210604105809.jpg'
 
@@ -68,7 +68,7 @@ img = './images/20210604105809.jpg'
 # drawed_image.show()
 
 img = './images/2.jpg'
-mask_rcnn = MASK_RCNN()
+mask_rcnn = MASK_RCNN(model=InferenceConfig.model, classes_path=InferenceConfig.classes_path, confidence=0.7)
 img = Image.open(img)
-image = mask_rcnn.detect_image(image = img)
-image.show()
+drawed_image,mask_image = mask_rcnn.detect_image(image = img)
+drawed_image.show()
