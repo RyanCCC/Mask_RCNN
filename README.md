@@ -39,6 +39,11 @@ config文件包含两个，一个是在```utils```文件夹下的```config.py```
 ONNX推理可以参考：[Deployment:MaskRCNN](https://github.com/RyanCCC/Deployment/tree/main/MaskRCNN)
 
 
+## 模型转换
+
+使用`convert.py`可以进行模型转换。如将权重和计算图转换成`Tensorflow saved_model`的格式。也可以将tensorflow的模型转换成ONNX的格式。详情请参考文档。
+一些简单的使用例子如下：`python .\convert.py --flag --saved_model .\save_model\ --save_onnx ./test.onnx`或者`python .\convert.py --weight .\model\village_building.h5 --label .\data\building.names --save_onnx ./test.onnx --saved_pb`
+
 ## 调试问题
 
 1. `Input image dtype is bool. Interpolation is not defined with bool data type`
