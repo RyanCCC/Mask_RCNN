@@ -70,6 +70,10 @@ class Evaluator(object):
         Acc = np.diag(self.confusion_matrix).sum()/self.confusion_matrix.sum()
         return Acc
     
+    def Pixel_Recall(self, class_index):
+        Acc = self.confusion_matrix[class_index][class_index]/self.confusion_matrix.sum(axis=0)[class_index]
+        return Acc
+
     def Pixel_Accuracy_Class(self):
         Acc = np.diag(self.confusion_matrix)/self.confusion_matrix.sum(axis=1)
         Acc = np.nanmean(Acc)
@@ -108,33 +112,42 @@ class Evaluator(object):
     def reset(self):
         self.confusion_matrix = np.zeros((self.num_class,) * 2)
 
+mask_rcnn = MASK_RCNN(model=config.InferenceConfig.model, classes_path = config.InferenceConfig.classes_path)
+class_names = mask_rcnn.get_class()
 
 
 if __name__ == '__main__':
-    ori_img = './train_data/20211229095227.jpg'
-    gt_img = './train_data/20211229095227.png'
-    pred_img = './train_data/save.png'
-    image = Image.open(ori_img)
-    gt_img = Image.open(gt_img)
-    pred_img = Image.open(pred_img)
-    pred_img = np.where(pred_img, 0, 1)
-    gt_img = np.array(gt_img)
-    gt_img = np.where(gt_img>0, 0, 1)
-    pred_img = np.array(pred_img)
-    mask_rcnn = MASK_RCNN()
-    class_names = mask_rcnn.get_class()
-    n_classes = len(class_names)
-    result_img, pred_img = mask_rcnn.detect_image(image=image)
-    result_img.show()
-    evaluate = Evaluator(2)
-    evaluate.add_batch(gt_img, pred_img)
-    acc = evaluate.Pixel_Accuracy()
-    print(acc)
+    dataset_root_path = config.CustomerConfig.TRAIN_DATASET
+    img_floder =os.path.join(dataset_root_path, "imgs")
+    mask_floder = os.path.join(dataset_root_path, "mask")
+    imglist = os.listdir(img_floder)
+    count = len(imglist)
+    np.random.seed(10101)
+    np.random.shuffle(imglist)
+    train_imglist = imglist[:int(count*0.8)]
+    val_imglist = imglist[int(count*0.8):]
 
-
-    # iou计算
-    iou = IoU_calculate(pred_img, gt_img, 1)
-    print(iou)
+    for img_name in val_imglist:
+        basename = os.path.splitext(img_name)[0]
+        ori_img = os.path.join(img_floder, img_name)
+        gt_img = os.path.join(mask_floder, basename+'.png')
+        image = Image.open(ori_img)
+        gt_img = Image.open(gt_img)
+        n_classes = len(class_names)
+        result_img, pred_img = mask_rcnn.detect_image(image=image)
+        pred_img.show()
+        evaluate = Evaluator(1+1)
+        evaluate.add_batch(np.array(gt_img), np.array(pred_img))
+        acc = evaluate.Pixel_Accuracy()
+        print('ACC:',acc)
+        recall = evaluate.Pixel_Recall(0)
+        print('Recall:', recall)
+        basename = os.path.splitext(img_name)[0]
+        image.save(os.path.join('./result', 'ori_'+basename+'.jpg'))
+        pred_img.save(os.path.join('./result', 'res_'+basename+'.jpg'))
+        # iou计算: TODO:FIXBUG
+        # iou = IoU_calculate(pred_img, gt_img, 2)
+        # print(iou)
 
 
 

@@ -16,7 +16,7 @@ class MASK_RCNN(object):
     def __init__(self, **kwargs):
         self.model_path = kwargs['model']
         self.classes_path= kwargs['classes_path']
-        self.confidence = kwargs['confidence']
+        self.confidence = 0.7
 
         # 使用coco数据集检测的时候，IMAGE_MIN_DIM=1024，IMAGE_MAX_DIM=1024, RPN_ANCHOR_SCALES=(32, 64, 128, 256, 512)
         self.RPN_ANCHOR_SCALES = InferenceConfig.RPN_ANCHOR_SCALES
