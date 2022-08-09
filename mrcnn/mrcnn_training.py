@@ -182,7 +182,7 @@ def load_image_gt(dataset, config, image_id, augment=False, augmentation=None,
     bbox = utils.extract_bboxes(mask)
 
     active_class_ids = np.zeros([dataset.num_classes], dtype=np.int32)
-     = dataset.source_class_ids[dataset.image_info[image_id]["source"]]
+    source_class_ids = dataset.source_class_ids[dataset.image_info[image_id]["source"]]
     active_class_ids[source_class_ids] = 1
 
     if use_mini_mask:

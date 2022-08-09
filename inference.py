@@ -11,6 +11,14 @@ from config import InferenceConfig
 
 img = './images/20210604105809.jpg'
 
+# def get_class(classes_path):
+#         classes_path = os.path.expanduser(classes_path)
+#         with open(classes_path) as f:
+#             class_names = f.readlines()
+#         class_names = [c.strip() for c in class_names]
+#         class_names.insert(0,"BG")
+#         return class_names
+
 
 # model_path = './model/building'
 # class_path = './data/building.names'
