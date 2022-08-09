@@ -14,7 +14,7 @@ config = CustomerConfig()
 
 count = len(imglist)
 dataset = CustomerDataset()
-dataset.load_shapes(config.NAME, len(imglist), config.CLASSES, img_floder, mask_floder, imglist, yaml_floder, train_mode=False)
+dataset.load_dataset(config.NAME, len(imglist), config.CLASSES, img_floder, mask_floder, imglist, yaml_floder, train_mode=False)
 dataset.prepare()
 
 

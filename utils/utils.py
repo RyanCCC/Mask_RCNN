@@ -78,6 +78,12 @@ def compute_overlaps(boxes1, boxes2):
     return overlaps
 
 
+'''
+compute_overlaps_masks() takes two arguments: 
+mask1 and mask2. Assume mask1 has m instances, and mask2 has n instances, 
+the function return an m*n array A. 
+A[i, j] represents the IoU of ith instances of mask1 and jth instances of mask2.
+'''
 def compute_overlaps_masks(masks1, masks2):
     """Computes IoU overlaps between two sets of masks.
     masks1, masks2: [Height, Width, instances]

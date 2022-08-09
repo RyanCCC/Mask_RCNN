@@ -38,6 +38,13 @@ config文件包含两个，一个是在```utils```文件夹下的```config.py```
 
 ONNX推理可以参考：[Deployment:MaskRCNN](https://github.com/RyanCCC/Deployment/tree/main/MaskRCNN)
 
+## 模型评估
+
+1. [Calculating mean Average Recall (mAR), mean Average Precision (mAP) and F1-Score](https://github.com/matterport/Mask_RCNN/issues/2513)
+
+2. [compue_ap](https://github.com/matterport/Mask_RCNN/blob/master/mrcnn/utils.py#L715)
+
+3. [语义分割之评价指标](https://zhuanlan.zhihu.com/p/61880018 )
 
 ## 模型转换
 

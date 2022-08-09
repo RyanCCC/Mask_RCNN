@@ -34,7 +34,7 @@ class CustomerDataset(Dataset):
         return mask
 
     #并在self.image_info信息中添加了path、mask_path 、yaml_path
-    def load_shapes(self, shape_name, count, classes, img_floder, mask_floder, imglist, yaml_floder, train_mode = True):
+    def load_dataset(self, shape_name, count, classes, img_floder, mask_floder, imglist, yaml_floder, train_mode = True):
         for index, item in enumerate(classes):
             self.add_class(shape_name, index+1, item)
         for i in range(count):

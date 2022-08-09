@@ -5,60 +5,19 @@ import config
 import os
 from mrcnn.mask_rcnn import MASK_RCNN
 from PIL import Image
+from utils import utils, dataset
+from mrcnn.mrcnn_training import load_image_gt
+import yaml
+
+mask_rcnn = MASK_RCNN(model=config.InferenceConfig.model, classes_path = config.InferenceConfig.class_path)
+class_names = mask_rcnn.get_class()
 
 '''
-图像分割评价指标：
-mIoU：类别平均交并比
-PixelAccuracy：像素精度，标记正确的像素占总像素的比例
-Mean Pixel accuracy：平均像素精度，每个类内被正确分类像素数的比例
-参考：https://zhuanlan.zhihu.com/p/61880018 
+参考：
+1. https://github.com/matterport/Mask_RCNN/blob/master/mrcnn/utils.py#L715
+2. https://github.com/matterport/Mask_RCNN/issues/2513
+3. https://zhuanlan.zhihu.com/p/61880018 
 '''
-
-def IoU_calculate(pred, target, n_classes):
-    ious = []
-    # ignore IOU for background class
-    for item in range(1, n_classes):
-        pred_inds =pred==item
-        target_inds = target==item
-        intersection = (pred_inds[target_inds]).sum()
-        union = pred_inds.sum()+target_inds.sum()-intersection
-        if union==0:
-            # if there is no ground true, do not include in evaluation
-            ious.append(float('nan'))
-        else:
-            ious.append(float(intersection)/float(max(union, 1)))
-    return ious
-
-# numpy版本
-
-def all_iou(a, b, n):
-    '''
-    a: ground true, shape:h*w
-    b: prediction, shape: h*w
-    n: class
-    '''
-    # 找出ground true中需要的类别
-    k = (a>0)&(a<=n)
-    return np.bincount(n*a[k].astype(int)+b[k], minlength=n**2).reshape(n, n)
-
-def per_class_iou(hist):
-    '''
-    分别为每个类别计算mIoU
-    '''
-    # 矩阵的对角线上的值组成的一维数组/矩阵的所有元素之和
-    return np.diag(hist)/(hist.sum(1)+hist.sum(0)-np.diag(hist))
-
-def mIoU_metric(pred, target, n_classes):
-    hist = np.zeros((n_classes, n_classes))
-    # 对图像进行计算hist矩阵并累加
-    hist+= all_iou(target.flattern(), pred.flattern(), n_classes)
-    # 计算每个类别的iou
-    mIoUs = per_class_iou(hist)
-    for ind_class in range(n_classes):
-        print(str(round(mIoUs[ind_class]*100, 2)))
-    print('--->mIoU：'+str(round(np.nanmean(mIoUs)*100, 2)))
-    return mIoUs
-
 
 class Evaluator(object):
     def __init__(self, num_class) -> None:
@@ -112,9 +71,90 @@ class Evaluator(object):
     def reset(self):
         self.confusion_matrix = np.zeros((self.num_class,) * 2)
 
-mask_rcnn = MASK_RCNN(model=config.InferenceConfig.model, classes_path = config.InferenceConfig.classes_path)
-class_names = mask_rcnn.get_class()
+class TestDataset(dataset.Dataset):
+    # 获取图中的实例个数
+    def get_obj_index(self, image):
+        n = np.max(image)
+        return n
+    
+    def get_class(self):
+        classes_path = os.path.expanduser(self.classes_path)
+        with open(classes_path) as f:
+            class_names = f.readlines()
+        class_names = [c.strip() for c in class_names]
+        class_names.insert(0,"BG")
+        return class_names
 
+    # 解析yaml
+    def get_classes_from_yaml(self, image_id):
+        info = self.image_info[image_id]
+        with open(info['yaml_path']) as f:
+            temp = yaml.load(f.read())
+            labels = temp['label_names']
+            del labels[0]
+        return labels
+    
+    def draw_mask(self, num_obj, mask, image, image_id):
+        info = self.image_info[image_id]
+        for index in range(num_obj):
+            for i in range(info['width']):
+                for j in range(info['height']):
+                    at_pixel = image.getpixel((i, j))
+                    if at_pixel == index + 1:
+                        mask[j, i, index] = 1
+        return mask
+    
+    def load_dataset(self, count, img_floder, mask_floder, imglist, dataset_root_path):
+        """
+        Generate the requested number of synthetic images.
+        count: number of images to generate.
+        height, width: the size of the generated images.
+        """
+        # Add classes
+        classes_names = config.get_class(config.InferenceConfig.class_path)
+        for index, item in enumerate(classes_names):
+            self.add_class('TestSet', index+1, item)
+
+        for i in range(count):
+            # 获取图片宽和高
+            filestr = imglist[i].split(".")[0]
+            mask_path = mask_floder + "/" + filestr + ".png"
+            yaml_path = dataset_root_path + "/" +"yaml/" + filestr + ".yaml"
+            print(dataset_root_path + "labelme_json/" + filestr + "_json/img.png")
+            cv_img = cv2.imread(dataset_root_path + "/" +"imgs/" + filestr + ".jpg")
+
+            self.add_image("shapes", image_id=i, path=img_floder + "/" + imglist[i],
+                           width=cv_img.shape[1], height=cv_img.shape[0], mask_path=mask_path, yaml_path=yaml_path)
+
+    def load_mask(self, image_id):
+        """Generate instance masks for shapes of the given image ID.
+        """
+        global iter_num
+        print("image_id", image_id)
+        info = self.image_info[image_id]
+        count = 1  # number of object
+        img = Image.open(info['mask_path'])
+        num_obj = self.get_obj_index(img)
+        mask = np.zeros([info['height'], info['width'], num_obj], dtype=np.uint8)
+        mask = self.draw_mask(num_obj, mask, img, image_id)
+        occlusion = np.logical_not(mask[:, :, -1]).astype(np.uint8)
+        for i in range(count - 2, -1, -1):
+            mask[:, :, i] = mask[:, :, i] * occlusion
+
+            occlusion = np.logical_and(occlusion, np.logical_not(mask[:, :, i]))
+        labels = []
+        labels = self.get_classes_from_yaml(image_id)
+        class_ids = np.array([self.class_names.index(s) for s in labels])
+        return mask, class_ids.astype(np.int32)
+
+def text_save(filename, data):
+    file = open(filename,'a')
+    for i in range(len(data)):
+        s = str(data[i]).replace('[','').replace(']','')
+        s = s.replace("'",'').replace(',','') +'\n'   
+        file.write(s)
+    file.close()
+    print(f'save success:{filename}')
 
 if __name__ == '__main__':
     dataset_root_path = config.CustomerConfig.TRAIN_DATASET
@@ -125,26 +165,41 @@ if __name__ == '__main__':
     np.random.seed(10101)
     np.random.shuffle(imglist)
     train_imglist = imglist[:int(count*0.8)]
-    val_imglist = imglist[int(count*0.8):]
+    test_imglist = imglist[int(count*0.8):]
+    test_count = len(test_imglist)
 
-    for img_name in val_imglist:
-        basename = os.path.splitext(img_name)[0]
-        ori_img = os.path.join(img_floder, img_name)
-        gt_img = os.path.join(mask_floder, basename+'.png')
-        image = Image.open(ori_img)
-        gt_img = Image.open(gt_img)
-        n_classes = len(class_names)
+    # 加载测试集
+    dataset_test = TestDataset()
+    dataset_test.load_dataset(test_count, img_floder, mask_floder, test_imglist, dataset_root_path)
+    dataset_test.prepare()
+
+    for imageid in dataset_test.image_ids:
+        image, image_meta, gt_class_id, gt_bbox, gt_mask = \
+            load_image_gt(dataset_test, config.InferenceConfig, imageid)
         result_img, pred_img = mask_rcnn.detect_image(image=image)
-        pred_img.show()
-        evaluate = Evaluator(1+1)
-        evaluate.add_batch(np.array(gt_img), np.array(pred_img))
-        acc = evaluate.Pixel_Accuracy()
-        print('ACC:',acc)
-        recall = evaluate.Pixel_Recall(0)
-        print('Recall:', recall)
-        basename = os.path.splitext(img_name)[0]
-        image.save(os.path.join('./result', 'ori_'+basename+'.jpg'))
-        pred_img.save(os.path.join('./result', 'res_'+basename+'.jpg'))
+
+
+        # '''
+        # Pixel Accuracy
+        # '''
+        # basename = os.path.splitext(imageid)[0]
+        # ori_img = os.path.join(img_floder, imageid)
+        # gt_img = os.path.join(mask_floder, basename+'.png')
+        # image = Image.open(ori_img)
+        # gt_img = Image.open(gt_img)
+        # n_classes = len(class_names)
+        # result_img, pred_img = mask_rcnn.detect_image(image=image)
+        # pred_img.show()
+        # gt_img.show()
+        # evaluate = Evaluator(1+1)
+        # evaluate.add_batch(np.array(gt_img), np.array(pred_img))
+        # acc = evaluate.Pixel_Accuracy()
+        # print('ACC:',acc)
+        # recall = evaluate.Pixel_Recall(0)
+        # print('Recall:', recall)
+        # basename = os.path.splitext(imageid)[0]
+        # image.save(os.path.join('./result', 'ori_'+basename+'.jpg'))
+        # pred_img.save(os.path.join('./result', 'res_'+basename+'.jpg'))
         # iou计算: TODO:FIXBUG
         # iou = IoU_calculate(pred_img, gt_img, 2)
         # print(iou)

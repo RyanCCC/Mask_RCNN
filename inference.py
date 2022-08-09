@@ -11,14 +11,6 @@ from config import InferenceConfig
 
 img = './images/20210604105809.jpg'
 
-# def get_class(classes_path):
-#         classes_path = os.path.expanduser(classes_path)
-#         with open(classes_path) as f:
-#             class_names = f.readlines()
-#         class_names = [c.strip() for c in class_names]
-#         class_names.insert(0,"BG")
-#         return class_names
-
 
 # model_path = './model/building'
 # class_path = './data/building.names'
@@ -68,7 +60,7 @@ img = './images/20210604105809.jpg'
 # drawed_image.show()
 
 img = './images/2.jpg'
-mask_rcnn = MASK_RCNN(model=InferenceConfig.model, classes_path=InferenceConfig.classes_path, confidence=0.7)
+mask_rcnn = MASK_RCNN(model=InferenceConfig.model, classes_path=InferenceConfig.class_path, confidence=0.7)
 img = Image.open(img)
 drawed_image,mask_image = mask_rcnn.detect_image(image = img)
 drawed_image.show()

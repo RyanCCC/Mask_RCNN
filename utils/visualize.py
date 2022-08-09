@@ -37,11 +37,7 @@ def apply_mask(image, mask, color, alpha=0.5):
     return image
 
 
-def display_instances(image, boxes, masks, class_ids, class_names,
-                      scores=None, title="",
-                      figsize=(16, 16), 
-                      show_mask=True, show_bbox=True,
-                      colors=None, captions=None):
+def display_instances(image, boxes, masks, class_ids, class_names,scores=None,show_mask=True, show_bbox=True,colors=None, captions=None):
     # instance的数量
     N = boxes.shape[0]
     if not N:
@@ -56,14 +52,14 @@ def display_instances(image, boxes, masks, class_ids, class_names,
     for i in range(N):
         color = colors[i]
 
-        # 该部分用于显示bbox
+        # display bounding box
         if not np.any(boxes[i]):
             continue
         y1, x1, y2, x2 = boxes[i]
         if show_bbox:
             cv2.rectangle(masked_image, (x1, y1), (x2, y2), (color[0] * 255,color[1] * 255,color[2] * 255), 2)
 
-        # 该部分用于显示文字与置信度
+        # display labels and captions
         if not captions:
             class_id = class_ids[i]
             score = scores[i] if scores is not None else None
@@ -75,7 +71,7 @@ def display_instances(image, boxes, masks, class_ids, class_names,
         font = cv2.FONT_HERSHEY_SIMPLEX
         cv2.putText(masked_image, caption, (x1, y1 + 8), font, 1, (255, 255, 255), 2)
 
-        # 该部分用于显示语义分割part
+        # display masks
         mask = masks[:, :, i]
         if show_mask:
             masked_image = apply_mask(masked_image, mask, color)

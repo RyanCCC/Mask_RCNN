@@ -28,4 +28,4 @@ class InferenceConfig(Config):
     IMAGE_MIN_DIM = 1024
     IMAGE_MAX_DIM = 1024
     model = r'.\model\village_building.h5'
-    classes_path = r'.\data\building.names'
+    class_path = r'.\data\building.names'

@@ -7,7 +7,7 @@ from utils import visualize
 from utils.anchors import get_anchors
 from utils.utils import mold_inputs,unmold_detections
 from mrcnn.mrcnn import get_model
-from mrcnn.mrcnn_training import data_generator,load_image_gt
+from mrcnn.mrcnn_training import data_generator
 from utils.customerDataset import CustomerDataset
 from config import CustomerConfig
 
@@ -54,12 +54,12 @@ if __name__ == "__main__":
 
     # 训练数据集准备
     dataset_train = CustomerDataset()
-    dataset_train.load_shapes(config.NAME,len(train_imglist), config.CLASSES, img_floder, mask_floder, train_imglist, yaml_floder, train_mode=True)
+    dataset_train.load_dataset(config.NAME,len(train_imglist), config.CLASSES, img_floder, mask_floder, train_imglist, yaml_floder, train_mode=True)
     dataset_train.prepare()
 
     # 验证数据集准备
     dataset_val = CustomerDataset()
-    dataset_val.load_shapes(config.NAME,len(val_imglist), config.CLASSES, img_floder, mask_floder, val_imglist, yaml_floder, train_mode=True)
+    dataset_val.load_dataset(config.NAME,len(val_imglist), config.CLASSES, img_floder, mask_floder, val_imglist, yaml_floder, train_mode=True)
     dataset_val.prepare()
 
     # 获得训练模型
