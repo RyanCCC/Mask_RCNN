@@ -5,9 +5,10 @@ import config
 import os
 from mrcnn.mask_rcnn import MASK_RCNN
 from PIL import Image
-from utils import utils, dataset
+from utils import utils, dataset, visualize
 from mrcnn.mrcnn_training import load_image_gt
 import yaml
+import matplotlib.pyplot as plt
 
 mask_rcnn = MASK_RCNN(model=config.InferenceConfig.model, classes_path = config.InferenceConfig.class_path)
 class_names = mask_rcnn.get_class()
@@ -123,7 +124,7 @@ class TestDataset(dataset.Dataset):
             print(dataset_root_path + "labelme_json/" + filestr + "_json/img.png")
             cv_img = cv2.imread(dataset_root_path + "/" +"imgs/" + filestr + ".jpg")
 
-            self.add_image("shapes", image_id=i, path=img_floder + "/" + imglist[i],
+            self.add_image("TestSet", image_id=i, path=img_floder + "/" + imglist[i],
                            width=cv_img.shape[1], height=cv_img.shape[0], mask_path=mask_path, yaml_path=yaml_path)
 
     def load_mask(self, image_id):
@@ -172,11 +173,58 @@ if __name__ == '__main__':
     dataset_test = TestDataset()
     dataset_test.load_dataset(test_count, img_floder, mask_floder, test_imglist, dataset_root_path)
     dataset_test.prepare()
-
+    APs = []
+    flag = 0
     for imageid in dataset_test.image_ids:
         image, image_meta, gt_class_id, gt_bbox, gt_mask = \
             load_image_gt(dataset_test, config.InferenceConfig, imageid)
-        result_img, pred_img = mask_rcnn.detect_image(image=image)
+        # 将所有ground truth载入并保存
+        if flag == 0:
+            gt_boxes, gt_class_ids, gt_masks = gt_bbox, gt_class_id, gt_mask
+        else:
+            gt_boxes = np.concatenate((gt_boxes, gt_bbox), axis=0)
+            gt_class_ids = np.concatenate((gt_class_ids, gt_class_id), axis=0)
+            gt_masks = np.concatenate((gt_masks, gt_mask), axis=2)
+        image = Image.fromarray(image)
+        r = mask_rcnn.get_detections(image=image)
+        if flag == 0:
+            pred_rois, pred_ids, pred_scores, pred_masks = r["rois"], r["class_ids"], r["scores"],  r['masks']
+        else:
+            pred_rois = np.concatenate((pred_rois, r["rois"]), axis=0)
+            pred_ids = np.concatenate((pred_ids, r["class_ids"]), axis=0)
+            pred_scores = np.concatenate((pred_scores, r["scores"]), axis=0)
+            pred_masks = np.concatenate((pred_masks, r['masks']), axis=2)
+        flag+=1
+        # 展示数据
+        drawed_image = visualize.display_instances(image, r['rois'], r['masks'], r['class_ids'], mask_rcnn.class_names, r['scores'], show_bbox=False)
+        # 处理mask 文件
+        mask_image = np.any(r['masks'], axis=-1)
+        mask_image = Image.fromarray(mask_image)
+        drawed_image.show()
+        mask_image.show()
+
+    iou_thresholds = [0.5, 0.6, 0.7, 0.8, 0.9]
+    # AP, precisions, recalls, overlaps =utils.compute_ap(gt_bbox, gt_class_id, gt_mask,r["rois"], r["class_ids"], r["scores"], r['masks'], iou_threshold=iou_threshold)
+    # 计算AP, precision, recall
+    for iou_threshold in iou_thresholds:
+        AP, precisions, recalls, overlaps = utils.compute_ap(gt_boxes, gt_class_ids, gt_masks, pred_rois, pred_ids, pred_scores, pred_masks, iou_threshold=iou_threshold)
+        print(f'AP@{iou_threshold}：{AP}')
+        print(f"mAP@{iou_threshold}: ", np.mean(AP))
+        # 保存precision, recall信息用于后续绘制图像
+    #     text_save(f'Kpreci@{iou_threshold}.txt', precisions)
+    #     text_save(f'Krecall@{iou_threshold}.txt', recalls)
+    #     text_save(f'KAP@{iou_threshold}.txt', [AP])
+    # plt.plot(recalls, precisions, 'b', label='PR')
+    # plt.title('precision-recall curve')
+    # plt.xlabel('Recall')
+    # plt.ylabel('Precision')
+    # plt.legend()
+    # plt.show()
+    
+
+
+
+
 
 
         # '''

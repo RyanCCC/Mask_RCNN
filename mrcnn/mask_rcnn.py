@@ -94,6 +94,30 @@ class MASK_RCNN(object):
         mask_image = np.any(r['masks'], axis=-1)
         mask_image = Image.fromarray(mask_image)
         return drawed_image, mask_image
+    
+    def get_detections(self, image):
+        image = [np.array(image)]
+        molded_images, image_metas, windows = mold_inputs(self.config,image)
+
+        image_shape = molded_images[0].shape
+        anchors = get_anchors(self.config,image_shape)
+        anchors = np.broadcast_to(anchors, (1,) + anchors.shape)
+
+        detections, _, _, mrcnn_mask, _, _, _ =\
+            self.model.predict([molded_images, image_metas, anchors], verbose=0)
+
+        final_rois, final_class_ids, final_scores, final_masks =\
+            unmold_detections(detections[0], mrcnn_mask[0],
+                                    image[0].shape, molded_images[0].shape,
+                                    windows[0])
+
+        r = {
+            "rois": final_rois,
+            "class_ids": final_class_ids,
+            "scores": final_scores,
+            "masks": final_masks,
+        }
+        return r
         
     def close_session(self):
         self.sess.close()
