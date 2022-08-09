@@ -9,6 +9,7 @@ from utils import utils, dataset, visualize
 from mrcnn.mrcnn_training import load_image_gt
 import yaml
 import matplotlib.pyplot as plt
+from tqdm import tqdm
 
 mask_rcnn = MASK_RCNN(model=config.InferenceConfig.model, classes_path = config.InferenceConfig.class_path)
 class_names = mask_rcnn.get_class()
@@ -175,7 +176,7 @@ if __name__ == '__main__':
     dataset_test.prepare()
     APs = []
     flag = 0
-    for imageid in dataset_test.image_ids:
+    for imageid in tqdm(dataset_test.image_ids):
         image, image_meta, gt_class_id, gt_bbox, gt_mask = \
             load_image_gt(dataset_test, config.InferenceConfig, imageid)
         # 将所有ground truth载入并保存
