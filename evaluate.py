@@ -196,13 +196,13 @@ if __name__ == '__main__':
             pred_scores = np.concatenate((pred_scores, r["scores"]), axis=0)
             pred_masks = np.concatenate((pred_masks, r['masks']), axis=2)
         flag+=1
-        # 展示数据
-        drawed_image = visualize.display_instances(image, r['rois'], r['masks'], r['class_ids'], mask_rcnn.class_names, r['scores'], show_bbox=False)
-        # 处理mask 文件
-        mask_image = np.any(r['masks'], axis=-1)
-        mask_image = Image.fromarray(mask_image)
-        drawed_image.show()
-        mask_image.show()
+        # # 展示数据
+        # drawed_image = visualize.display_instances(image, r['rois'], r['masks'], r['class_ids'], mask_rcnn.class_names, r['scores'], show_bbox=False)
+        # # 处理mask 文件
+        # mask_image = np.any(r['masks'], axis=-1)
+        # mask_image = Image.fromarray(mask_image)
+        # drawed_image.show()
+        # mask_image.show()
 
     iou_thresholds = [0.5, 0.6, 0.7, 0.8, 0.9]
     # AP, precisions, recalls, overlaps =utils.compute_ap(gt_bbox, gt_class_id, gt_mask,r["rois"], r["class_ids"], r["scores"], r['masks'], iou_threshold=iou_threshold)
