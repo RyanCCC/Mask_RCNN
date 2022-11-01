@@ -37,7 +37,7 @@ def apply_mask(image, mask, color, alpha=0.5):
     return image
 
 
-def display_instances(image, boxes, masks, class_ids, class_names,scores=None,show_mask=True, show_bbox=True,colors=None, captions=None):
+def display_instances(image, boxes, masks, class_ids, class_names,scores=None,show_mask=True, show_bbox=True,colors=None, captions=True):
     # instance的数量
     N = boxes.shape[0]
     if not N:
@@ -48,7 +48,8 @@ def display_instances(image, boxes, masks, class_ids, class_names,scores=None,sh
 
     # 当masked_image为原图时是在原图上绘制
     # 如果不想在原图上绘制，可以把masked_image设置成等大小的全0矩阵
-    masked_image = np.array(image,np.uint8)
+    # masked_image = np.array(image,np.uint8)
+    masked_image = np.zeros_like(image,np.uint8)
     for i in range(N):
         color = colors[i]
 
@@ -60,17 +61,14 @@ def display_instances(image, boxes, masks, class_ids, class_names,scores=None,sh
             cv2.rectangle(masked_image, (x1, y1), (x2, y2), (color[0] * 255,color[1] * 255,color[2] * 255), 2)
 
         # display labels and captions
-        if not captions:
+        if captions:
             class_id = class_ids[i]
             score = scores[i] if scores is not None else None
             label = class_names[class_id]
             caption = "{} {:.3f}".format(label, score) if score else label
-        else:
-            caption = captions[i]
+            font = cv2.FONT_HERSHEY_SIMPLEX
+            cv2.putText(masked_image, caption, (x1, y1 + 8), font, 1, (255, 255, 255), 2)
         
-        font = cv2.FONT_HERSHEY_SIMPLEX
-        cv2.putText(masked_image, caption, (x1, y1 + 8), font, 1, (255, 255, 255), 2)
-
         # display masks
         mask = masks[:, :, i]
         if show_mask:
