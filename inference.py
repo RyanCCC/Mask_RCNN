@@ -8,8 +8,9 @@ from utils.utils import mold_inputs,unmold_detections
 from utils import visualize
 import os
 from config import InferenceConfig
+from glob import glob
+from tqdm import tqdm
 
-img = './images/1.png'
 
 # def get_class(classes_path):
 #         classes_path = os.path.expanduser(classes_path)
@@ -67,12 +68,14 @@ img = './images/1.png'
 # drawed_image.save('6.jpg')
 # drawed_image.show()
 
-img = './images/test2.jpg'
+images = glob('./samples/*')
 mask_rcnn = MASK_RCNN(model=InferenceConfig.model, classes_path=InferenceConfig.class_path, confidence=0.85)
-img = Image.open(img).convert('RGB')
-drawed_image,mask_image = mask_rcnn.detect_image(image = img)
-img.show()
-drawed_image.show()
-mask_image.show()
-mask_image.save('mask.png')
-print('Debug')
+for img_name in tqdm(images):
+    image = Image.open(img_name).convert('RGB')
+    drawed_image,mask_image = mask_rcnn.detect_image(image = image)
+    # drawed_image.show()
+    result_img = Image.blend(image, drawed_image, 0.5)
+    result_img.show()
+    save_filename = os.path.join('./result', os.path.basename(img_name))
+    result_img.save(save_filename)
+    

@@ -64,7 +64,7 @@ class MASK_RCNN(object):
         # self.model.save('./maskrcnn_coco', save_format='tf')
     
 
-    def detect_image(self, image):
+    def detect_image(self, image, showBox = False, show_caption=False):
         image = [np.array(image)]
         molded_images, image_metas, windows = mold_inputs(self.config,image)
 
@@ -89,7 +89,7 @@ class MASK_RCNN(object):
 
         # 想要保存处理后的图片请查询plt保存图片的方法。
         drawed_image = visualize.display_instances(image[0], r['rois'], r['masks'], r['class_ids'], 
-                                    self.class_names, r['scores'])
+                                    self.class_names, r['scores'], show_bbox = showBox, captions=show_caption)
         # 处理mask 文件
         mask_image = np.any(r['masks'], axis=-1)
         mask_image = Image.fromarray(mask_image)

@@ -27,5 +27,5 @@ class InferenceConfig(Config):
     RPN_ANCHOR_SCALES = (16, 32, 64, 128, 256)
     IMAGE_MIN_DIM = 1024
     IMAGE_MAX_DIM = 1024
-    model = r'.\model\village_building.h5'
-    class_path = r'.\data\building.names'
+    model = r'./model/village_building.h5'
+    class_path = r'./data/building.names'
