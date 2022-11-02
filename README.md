@@ -51,6 +51,17 @@ ONNX推理可以参考：[Deployment:MaskRCNN](https://github.com/RyanCCC/Deploy
 使用`convert.py`可以进行模型转换。如将权重和计算图转换成`Tensorflow saved_model`的格式。也可以将tensorflow的模型转换成ONNX的格式。详情请参考文档。
 一些简单的使用例子如下：`python .\convert.py --flag --saved_model .\save_model\ --save_onnx ./test.onnx`或者`python .\convert.py --weight .\model\village_building.h5 --label .\data\building.names --save_onnx ./test.onnx --saved_pb`
 
+参数说明：
+
+- weight：待转换的权重文件
+- label：标签文件的路径
+- saved_pb：是否保存pb文件
+- saved_pb_dir：保存pb文件的路径
+- saved_model：保存tensorflow模型
+- save_onnx：保存onnx文件路径
+- opset：onnx算子类型
+- flag：带有这个标记说明是`tensorflow model`模型转换成onnx，否则为权重转换成onnx模型
+
 ## 调试问题
 
 1. `Input image dtype is bool. Interpolation is not defined with bool data type`
