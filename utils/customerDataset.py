@@ -20,6 +20,10 @@ class CustomerDataset(Dataset):
         return labels
 
     def draw_mask(self, num_obj, mask, image, image_id):
+        npz_save_name =os.path.join(save_path, base_name)
+        # 已经生成npz文件则跳过
+        if os.path.exists(npz_save_name):
+            return None
         info = self.image_info[image_id]
         for index in range(num_obj):
             for i in range(np.shape(mask)[1]):
@@ -30,7 +34,7 @@ class CustomerDataset(Dataset):
         save_path = os.path.dirname(info['mask_path'])
         base_name = os.path.basename(info['path'])
         base_name = os.path.splitext(base_name)[0]
-        np.savez_compressed(os.path.join(save_path, base_name), mask)
+        np.savez_compressed(npz_save_name, mask)
         return mask
 
     #并在self.image_info信息中添加了path、mask_path 、yaml_path
