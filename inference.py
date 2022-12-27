@@ -68,14 +68,17 @@ from tqdm import tqdm
 # drawed_image.save('6.jpg')
 # drawed_image.show()
 
-images = glob('./samples/*.png')
-mask_rcnn = MASK_RCNN(model=InferenceConfig.model, classes_path=InferenceConfig.class_path, confidence=0.8)
+images = glob('./samples/*')
+save_path = './result'
+if not os.path.exists(save_path):
+    os.makedirs(save_path)
+mask_rcnn = MASK_RCNN(model=InferenceConfig.model, classes_path=InferenceConfig.class_path, confidence=0.7)
 for img_name in tqdm(images):
     image = Image.open(img_name).convert('RGB')
     drawed_image,mask_image = mask_rcnn.detect_image(image = image)
-    # drawed_image.show()
+    drawed_image.show()
     result_img = Image.blend(image, drawed_image, 0.5)
     # result_img.show()
-    save_filename = os.path.join('./result', os.path.basename(img_name))
+    save_filename = os.path.join(save_path, os.path.basename(img_name))
     result_img.save(save_filename)
     

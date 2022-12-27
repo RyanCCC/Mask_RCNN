@@ -10,8 +10,8 @@ from mrcnn.mask_rcnn import MASK_RCNN
 
 def parser_opt():
     parser = argparse.ArgumentParser(description="Convert Mask RCNN model")
-    parser.add_argument('--weight', type=str, help='model weight', default='')
-    parser.add_argument('--label', type=str,help='label file', default='')
+    parser.add_argument('--weight', type=str, help='model weight', required=True)
+    parser.add_argument('--label', type=str,help='label file', required=True)
     parser.add_argument('--saved_pb', action='store_true', help='save pb model to current directory')
     parser.add_argument('--saved_pb_dir', type=str, default='./save_model', help='save pb file if needed. Default:save_model')
     
@@ -41,7 +41,7 @@ def main(args):
         class_path = args.label
         assert len(weights) > 0, 'weights cannot be none or empty.'
         assert len(class_path) > 0, 'classes path doesn\'t exists.'
-        mask_rcnn = MASK_RCNN(model=weights, classes_path=class_path, confidence=0.7)
+        mask_rcnn = MASK_RCNN(model=weights, classes_path=class_path, confidence=0.8)
 
         save_pb = args.saved_pb
         if save_pb:

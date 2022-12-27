@@ -14,7 +14,7 @@ class InferenceConfig(Config):
     RPN_ANCHOR_SCALES = (16, 32, 64, 128, 256)
     IMAGE_MIN_DIM = 512
     IMAGE_MAX_DIM = 512
-    model = './village_building_20221107.onnx'
+    model = './maskrcnn_0.8.onnx'
     classes_path = './data/building.names'
 
 def random_colors(N, bright=True):
@@ -41,7 +41,7 @@ class MASK_RCNN(object):
     _defaults = {
         "model_path": InferenceConfig.model,
         "classes_path": InferenceConfig.classes_path,
-        "confidence": 0.7,
+        "confidence": 0.5,
         # 使用coco数据集检测的时候，IMAGE_MIN_DIM=1024，IMAGE_MAX_DIM=1024, RPN_ANCHOR_SCALES=(32, 64, 128, 256, 512)
         "RPN_ANCHOR_SCALES": InferenceConfig.RPN_ANCHOR_SCALES,
         "IMAGE_MIN_DIM": InferenceConfig.IMAGE_MIN_DIM,
@@ -74,7 +74,6 @@ class MASK_RCNN(object):
             NUM_CLASSES = len(self.class_names)
             GPU_COUNT = 1
             IMAGES_PER_GPU = 1
-            DETECTION_MIN_CONFIDENCE = self.confidence
             NAME = "Customer"
             RPN_ANCHOR_SCALES = self.RPN_ANCHOR_SCALES
             IMAGE_MIN_DIM = self.IMAGE_MIN_DIM
@@ -131,8 +130,8 @@ class MASK_RCNN(object):
     
 if __name__ == '__main__':
     mask_rcnn = MASK_RCNN()
-    img = './samples/2021-11-01_112614.jpg'
-    image = Image.open(img)
+    img = './samples/20221101144640.png'
+    image = Image.open(img).convert('RGB')
     r_image = mask_rcnn.detect_image(image)
     img = Image.fromarray(r_image)
     img = Image.blend(img, image, 0.7)

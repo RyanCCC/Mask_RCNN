@@ -362,7 +362,7 @@ class DetectionLayer(KL.Layer):
         image_shape = m['image_shape'][0]
         window = norm_boxes_graph(m['window'], image_shape[:2])
 
-        # Run detection refinement graph on each item in the batch
+        # Run detection refinement graph on each item in the batch. 在此设定相关的阈值：refine_detections_graph
         detections_batch = utils.batch_slice(
             [rois, mrcnn_class, mrcnn_bbox, window],
             lambda x, y, w, z: refine_detections_graph(x, y, w, z, self.config),
